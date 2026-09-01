@@ -2,38 +2,25 @@
 
 With the Semantic Claims Model, important software behavior remains understandable and testable as code changes.
 
-It's for anyone (people, coding agents, sentient animals) who build, maintain, extend, or need to understand software. Its influences include TDD, invariants in code design, and Gherkin-style acceptance criteria.
+It's for anyone (people, coding agents, sentient animals) who build, maintain, extend, or need to understand software over time. Its influences include TDD, invariants in code design, and Gherkin-style acceptance criteria.
 
-## The model
-
-The model has three parts:
+There's three pieces to it:
 
 ```text
 claim -> proof -> implementation
 ```
 
-- A **claim** is a plain-language statement of a subject's observable behavior
-- A **proof** is a separate executable test of that behavior
-- The **implementation** is the code that must satisfy the claim and pass the proof
+## Claims and proofs
 
-Each claim has a coherent [**subject**](./SUBJECTS.md) and specifies one part of that subject's semantics as **observable behavior**. Every claim must have at least one **executable proof**.
+### Claims
 
-There are two kinds of claims:
+**Claims** are Markdown documents claiming the observable behavior of a given subject.
 
-- An **invariant** describes a standing truth.
-- A **scenario** describes behavior whose meaning depends on event order.
-
-The sequence is claim, proof, then implementation, forming a discrete unit of context, unambiguous intent, and implementation.
-
-Claim documents get colocated with code and tests. A `--name` claim document is a cross-cutting claim, used when behavior belongs to an interaction among several subjects. Cross-cutting claims apply only to behavior that can't be stated about any single subject, and they don't repeat local claims. They get placed at the closest shared boundary, as they cut across multiple subjects.
-
-Projects can choose file and test conventions that fit their language and test framework. This repository includes [JavaScript and TypeScript conventions](./JAVASCRIPT.md) and a checker for them.
-
-## A small example
-
-Suppose a newer search must take precedence over an older search still in progress. In `search.scenarios.md`, that behavior appears as:
+For example, suppose a newer search must take precedence over an older search still in progress. In a claim document named `search.scenarios.md`, that behavior can be _claimed_:
 
 ```md
+# Search filter
+
 ## §1 Search precedence
 
 ### §1.1 Newer searches supersede older results
@@ -41,9 +28,25 @@ Suppose a newer search must take precedence over an older search still in progre
 After a newer search begins, completing an older search leaves the latest result unchanged.
 ```
 
-The claim does not mention an API, library, or implementation. It only describes the observable behavior of published search results.
+Breaking down the anatomy of the claim document:
 
-Under the JavaScript and TypeScript conventions, the paired proof in `search.scenarios.test.ts` repeats the section and claim titles exactly:
+1. `Search filter` is the [**subject**](./SUBJECTS.md) of claims.
+2. `Search precedence` is a **claim set** grouping one or more claims together
+3. `Newer searches supersede...` is a **claim**
+4. `After a newer search begins...` is the **observable behavior** being claimed
+
+Claims do _not_ describe APIs, libraries, or implementation details—notice there's no code references in the claim document above. Claims _only_ specify semantics that can be expressed as observable behavior. This allows implementations to change without needing to constantly adjust underlying semantics—as long as the observable behavior remains the same, the claim itself doesn't need to change; only the proof might.
+
+There are two kinds of claims:
+
+- An **invariant** describes a constant truth.
+- A **scenario** describes behavior whose meaning depends on event order.
+
+There is also another type of claim, known as **cross-cutting**, for when observable behavior exists between multiple subjects. Cross-cutting claim documents get placed at the closest shared boundary, and prefixed with `--` (for example, `--name.invariants.md`).
+
+### Proofs
+
+Each claim document has a paired **proof** file. A proof tests each claim by actually exercising each observable behavior in the claim document. Following JS/TS conventions, the paired proof would be named `search.scenarios.test.ts`, which match the section and claim titles from the claim document _exactly_:
 
 ```ts
 describe('§1 Search precedence', () => {
@@ -60,16 +63,29 @@ describe('§1 Search precedence', () => {
 });
 ```
 
-The Markdown file contains the claim, and the test proves it by exercising the subject. In JavaScript and TypeScript projects, shared identifiers and matching titles connect each claim to its proof so the checker can detect mismatches.
+Note: This repository includes [JS and TS conventions](./JAVASCRIPT.md) that work with a provided checker, which verifies in a project that shared identifiers and matching titles connect each claim to its proof, and flags any mismatches.
 
-_Observable_ matters for two reasons:
+Claims and proofs should be colocated with a subject's implementation.
 
-1. Claims describe what a user, caller, or other subject can observe, not private implementation details.
-2. Proofs test that behavior through an observable interface rather than inspecting private mechanisms.
+## Method
 
-An API and implementation may change while the same observable behavior remains.
+Revisiting this:
 
-## Learn the method
+```text
+claim -> proof -> implementation
+```
+
+That's also the intended _sequence_ for authoring, which follows a TDD-like method:
+
+1. **claim**: write the claims for a subject
+2. **prove**: write the proofs for the claims
+3. **implement**: write the implementation to fit the proof
+
+It's expected that, when following this order, proofs should fail until the implementation is actually written—also TDD-like.
+
+The set of all three—claims, proofs, and implementation—form a discrete unit of context and unambiguous intent that gets colocated with the implementation.
+
+## Explore the repo
 
 1. [OVERVIEW.md](./OVERVIEW.md): motivation and repo guide.
 2. [FAQ.md](./FAQ.md): common questions about Semantic Claims, TDD, and acceptance criteria.
@@ -82,17 +98,19 @@ An API and implementation may change while the same observable behavior remains.
 9. [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.
 10. [ELEPHANT-GOLDFISH.md](./ELEPHANT-GOLDFISH.md): using Semantic Claims within the Elephant-Goldfish development process.
 
-The repository also includes a [JavaScript and TypeScript claim checker and local Semantic Explorer](./scripts/check-semantics.mjs), plus an optional [project-local agent skill](./.agents/skills/semantic-claims) for integrating the method into development workflows. The repository is licensed under the [MIT License](./LICENSE).
+## Tooling
 
-Fun fact: we used Semantic Claims to build the [validation scripts](./scripts), if you want to see the model in action.
+The repo also includes a [JS and TS claim checker and local Semantic Explorer](./scripts/check-semantics.mjs), plus [agent skills](./.agents/skills/semantic-claims) that can be used to help integrate the method into development workflows.
 
-## Install the alpha
+Fun fact: Semantic Claims were used to build the [validation scripts](./scripts), if you want to see the model in action.
 
-The alpha supports single-package ESM JavaScript and TypeScript projects running Node 22 or Node 24. Install it as a development dependency:
+You can install the (alpha) checker as a dev dependency:
 
 ```sh
 npm install --save-dev semantic-claims@alpha
 ```
+
+It was tested with single-package ESM JS/TS projects running Node 22 or 24, though I've used it successfully in a pnpm monorepo as well, but ymmv.
 
 Add commands for checking claims and opening the explorer:
 
@@ -111,9 +129,9 @@ The checker verifies the links between claim documents and proof files, includin
 npm run check:semantics
 ```
 
-Proofs are just part of whatever test harness you already use, so however you run them is up to you.
+Proofs are just normal tests and should run when you run your tests as usual.
 
-The [JavaScript and TypeScript conventions](./JAVASCRIPT.md) define the supported filenames and the exact links between claims and proofs.
+The [JS and TS conventions](./JAVASCRIPT.md) define the supported filenames and the exact links between claims and proofs.
 
 The commands `semantic-claims invariants` and `semantic-claims scenarios` are also available when only one claim kind needs checking.
 
@@ -141,4 +159,4 @@ Uninstall the package, remove its package scripts, and delete the copied skill i
 npm uninstall semantic-claims
 ```
 
-Claim documents and proofs belong to the project rather than the package. They can remain after the tooling is removed.
+Any authored claim documents and proofs are safe, and won't be touched if uninstalled.
