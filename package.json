@@ -1,0 +1,63 @@
+{
+  "name": "semantic-claims",
+  "version": "0.1.0-alpha.0",
+  "description": "Validate and explore Semantic Claim documents and their executable proofs.",
+  "license": "MIT",
+  "author": "Henry Ivry",
+  "type": "module",
+  "packageManager": "bun@1.3.10",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hejhi/semantic-claims.git"
+  },
+  "homepage": "https://github.com/hejhi/semantic-claims#readme",
+  "bugs": {
+    "url": "https://github.com/hejhi/semantic-claims/issues"
+  },
+  "bin": {
+    "semantic-claims": "scripts/check-semantics.mjs"
+  },
+  "files": [
+    ".agents/skills/semantic-claims",
+    "ELEPHANT-GOLDFISH.md",
+    "EXAMPLES.md",
+    "EXISTING-SYSTEMS.md",
+    "FAQ.md",
+    "INVARIANTS.md",
+    "JAVASCRIPT.md",
+    "OVERVIEW.md",
+    "SCENARIOS.md",
+    "SEMANTICS.md",
+    "SUBJECTS.md",
+    "assets/semantic-explorer.png",
+    "scripts/check-semantics.mjs",
+    "scripts/check-semantics/parse.mjs",
+    "scripts/check-semantics/typescript.mjs",
+    "scripts/check-semantics/validate.mjs",
+    "scripts/semantic-explorer/model.mjs",
+    "scripts/semantic-explorer/render.mjs",
+    "scripts/semantic-explorer/server.mjs"
+  ],
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "alpha"
+  },
+  "scripts": {
+    "check:semantics": "bun scripts/check-semantics.mjs",
+    "check:invariants": "bun scripts/check-semantics.mjs invariants",
+    "check:scenarios": "bun scripts/check-semantics.mjs scenarios",
+    "preview:explorer": "bun scripts/semantic-explorer/preview.mjs",
+    "sync:skills": "bun scripts/sync-skills.mjs",
+    "test": "bun test",
+    "test:package:node22": "npm exec --yes --package=node@22 -- node scripts/package-smoke.mjs --expected-node=22",
+    "test:package:node24": "npm exec --yes --package=node@24 -- node scripts/package-smoke.mjs --expected-node=24",
+    "test:package": "bun run test:package:node22 && bun run test:package:node24"
+  },
+  "dependencies": {
+    "typescript": "7.0.2"
+  }
+}
