@@ -1,314 +1,332 @@
-# Semantic Claim Decision Examples
+# Examples
 
-Use these examples to decide whether observable behavior warrants a Semantic Claim and, when it does, whether to write an invariant or scenario. Apply them with the [claim criteria](./CLAIMS.md#deciding-whether-a-claim-is-warranted). The model does not prescribe what to do when no Semantic Claim is warranted.
+These examples cover the decisions required by the Semantic Claims Model. They are exhaustive with respect to the decision process, not the kinds of software behavior that may be claimed.
 
-The same observable behavior may warrant a claim in one product but not another. The deciding question is which behavior maintainers intend to guarantee, not what the current implementation happens to do.
+Each classification assumes the stated intent. The same current behavior may warrant a claim in one system and remain unclaimed in another because maintainers intend different semantic contracts.
 
-## How to use these examples
+Warranted examples include the complete Markdown claim document. Proof obligations remain independent of any language or test framework; [JAVASCRIPT.md](./JAVASCRIPT.md) shows how JavaScript and TypeScript projects link these documents to executable proofs.
 
-For a candidate behavior, first ask:
+## Warranted claims
 
-1. Would removing it create a meaningful regression?
-2. Is it observable outside the private mechanism that produces it?
-3. Is it part of the subject's intended public behavior?
-4. Can an executable proof observe it at the same level of abstraction?
-5. Would a plain-language claim make the intended meaning clearer than tests alone?
+### A boundary rule is an invariant
 
-If every answer is yes, the observable behavior probably warrants a Semantic Claim. A standing truth is an invariant; behavior whose meaning depends on an ordered sequence is a scenario. If an answer is no, do not add a Semantic Claim. The model does not prescribe what to do instead.
+**Context:** A range includes both endpoints.
 
-A useful tie-breaker is:
+- **Observer:** caller querying membership
+- **Kind:** invariant
 
-> Would a competent fresh implementer be reasonably likely to omit or alter this behavior without the claim, and would that constitute a real regression?
-
-Use Semantic Claims for the smallest non-overlapping set of observable behaviors that need an explicit semantic description. The model does not prescribe practices for other concerns.
-
-## Warranted invariants
-
-### Rejected input preserves accepted state
-
-**Context:** A collection accepts only records with unique identifiers. A rejected insertion must not disturb records already accepted.
-
-**Classification**
-
-- Semantic Claim warranted: yes
-- Claim kind: invariant
-- Subject: the collection
-- Observable behavior: rejecting a duplicate leaves the collection's accepted contents unchanged
-- Proof obligation: attempt a duplicate insertion and observe the public contents before and after rejection
-
-**Candidate claim:**
-
-> Rejected duplicates leave the collection unchanged.
-
-This is a standing postcondition. A future implementation might validate after mutating, partially update an index, or replace the storage mechanism entirely. The private validation order is irrelevant; the unchanged public contents are the claimed semantics.
-
-By contrast, “validation runs before insertion” is not a claim. It describes one mechanism, and an implementation can satisfy the invariant without retaining that order.
-
-### Equal-ranked results retain arrival order
-
-**Context:** Maintainers guarantee predictable ordering when multiple results have the same rank.
-
-**Classification**
-
-- Semantic Claim warranted: yes
-- Claim kind: invariant
-- Subject: ranked results
-- Observable behavior: results with equal rank appear in the order they arrived
-- Proof obligation: add equal-ranked results in multiple orders and observe their published order
-
-**Candidate claim:**
-
-> Equally ranked results retain their arrival order.
-
-The ordering is observable, intentional, and meaningful to consumers. The proof cases may cover several ranks and insertion orders, but those cases prove one semantic rule rather than creating a separate claim for every example.
-
-If no ordering guarantee exists for ties, the database's current return order does not create a claim. A test that fixes that incidental order would preserve an implementation accident.
-
-### A protocol rejection uses a defined status
-
-**Context:** Clients distinguish an expired credential from other authorization failures using a documented status code.
-
-**Classification**
-
-- Semantic Claim warranted: yes
-- Claim kind: invariant
-- Subject: authentication responses
-- Observable behavior: an expired credential is rejected with the defined status
-- Proof obligation: present an expired credential through the public protocol and observe the response status
-
-**Candidate claim:**
-
-> Expired credentials are rejected with status `401`.
-
-Although the claim contains a technical token, that token is part of the observable protocol contract. This differs from naming the internal exception class or validation function, which clients cannot observe and implementations need not preserve.
-
-## Warranted scenarios
-
-### A retried operation does not repeat its effect
-
-**Context:** A client may retry a payment request after losing the first response. Repeating the same request identity must not charge the customer twice.
-
-**Classification**
-
-- Semantic Claim warranted: yes
-- Claim kind: scenario
-- Subject: payment request processing
-- Observable behavior: retrying an already accepted request returns its established outcome without creating another charge
-- Proof obligation: accept a request, retry the same identity, and observe both the returned outcome and recorded charges
-
-**Candidate claim:**
-
-> After a payment request is accepted, retrying the same request returns its established outcome without creating another charge.
-
-The order is essential: the meaning depends on an accepted request existing before the retry. This is more than a general assertion that request identifiers are unique.
-
-The number of internal delivery attempts is a separate concern. Unless maintainers guarantee that number to callers, it does not warrant a Semantic Claim.
-
-### Newer work supersedes an older completion
-
-**Context:** Two searches can be in progress simultaneously, and the older one may finish last.
-
-**Classification**
-
-- Semantic Claim warranted: yes
-- Claim kind: scenario
-- Subject: published search results
-- Observable behavior: an older completion cannot replace results for a newer search
-- Proof obligation: start two searches, complete the older one last, and observe the published result
-
-**Candidate claim:**
-
-> After a newer search begins, completing an older search leaves the latest result unchanged.
-
-The proof must control the meaningful order rather than merely wait for real network timing. A debounce interval, promise implementation, or cancellation mechanism may change without redefining the scenario.
-
-### Closing a modal restores the user's place
-
-**Context:** Opening a modal moves keyboard focus into it. When the modal closes, keyboard users must be able to continue from the control that opened it.
-
-**Classification**
-
-- Semantic Claim warranted: yes
-- Claim kind: scenario
-- Subject: modal focus behavior
-- Observable behavior: closing the modal restores focus to its invoking control
-- Proof obligation: focus the invoking control, open and close the modal, and observe the active element
-
-**Candidate claim:**
-
-> When a modal closes, focus returns to the control that opened it.
-
-This behavior matters to an observable user workflow. The focus-trap library, stored element reference, and event-handler arrangement are implementation details.
-
-### Failed checkout compensation is cross-cutting
-
-**Context:** A checkout coordinates separate payment authorization and order persistence subjects. Payment authorization defines how funds are reserved and released. Order persistence defines whether an order is durably recorded. The observable outcome when authorization succeeds but persistence fails cannot be stated about either local subject alone.
-
-**Classification**
-
-- Semantic Claim warranted: yes
-- Claim kind: scenario
-- Placement: cross-cutting (`--`)
-- Subject: checkout compensation across payment authorization and order persistence
-- Observable behavior: checkout releases an authorization before reporting failure when the order cannot be persisted
-- Proof obligation: authorize payment, make order persistence fail, and observe that release occurs before checkout reports failure
-
-At the narrowest common boundary of the two subjects, the claim document might be named `--checkout-compensation.scenarios.md`:
+`range.invariants.md`:
 
 ```md
-# Checkout Compensation Scenarios
+# Range
 
-Checkout compensation preserves the customer's payment state when an authorized checkout cannot create its order.
+## §1 Endpoint inclusion
+
+### §1.1 Both endpoints belong to the range
+
+A value equal to either endpoint is included.
+```
+
+**Proof obligation:** Construct ranges with different endpoints and observe that each endpoint is included.
+
+The result is intended, observable, meaningful, independently stated, provable, and distinct. Test setup has an order, but changing that order does not change the rule.
+
+### A postcondition is an invariant
+
+**Context:** A collection rejects records whose identifiers are already present.
+
+- **Observer:** caller reading the collection after rejection
+- **Kind:** invariant
+
+`collection.invariants.md`:
+
+```md
+# Collection
+
+## §1 Duplicate rejection
+
+### §1.1 Rejected duplicates leave the collection unchanged
+
+Rejecting a record whose identifier is already present leaves the accepted contents unchanged.
+```
+
+**Proof obligation:** Record the accepted contents, attempt a duplicate insertion, and observe the same contents afterward.
+
+The attempted insertion precedes the observation, but relative order among competing events is not part of the semantics. “Validation runs before insertion” would describe one private mechanism, not this invariant.
+
+### An exact protocol value can be an invariant
+
+**Context:** Clients distinguish expired credentials through a documented response status.
+
+- **Observer:** protocol client
+- **Kind:** invariant
+
+`authentication-responses.invariants.md`:
+
+```md
+# Authentication responses
+
+## §1 Expired credentials
+
+### §1.1 Expired credentials are rejected with status `401`
+
+An expired credential receives status `401`.
+```
+
+**Proof obligation:** Submit an expired credential and observe status `401` at the protocol boundary.
+
+The exact token belongs in the claim because clients are meant to rely on it. An internal exception class does not.
+
+### Superseding work is a scenario
+
+**Context:** Two searches may overlap, and the older search may finish last.
+
+- **Observer:** result consumer
+- **Kind:** scenario
+
+`published-search-results.scenarios.md`:
+
+```md
+# Published search results
+
+## §1 Search precedence
+
+### §1.1 Newer searches supersede older results
+
+After a newer search begins, completing an older search leaves the latest result unchanged.
+```
+
+**Proof obligation:** Start two searches, control both completion orders, and observe that the older completion never replaces the newer result.
+
+Start and completion order determine the expected result. Real network timing, cancellation, and promise handling are implementation details.
+
+### Arrival-order precedence is a scenario
+
+**Context:** Equally ranked results must retain the order in which they arrive.
+
+- **Observer:** result consumer
+- **Kind:** scenario
+
+`published-ranked-results.scenarios.md`:
+
+```md
+# Published ranked results
+
+## §1 Equal-rank order
+
+### §1.1 Equal-ranked results retain arrival order
+
+When equally ranked results arrive in sequence, they are published in that order.
+```
+
+**Proof obligation:** Supply equal-ranked results in different arrival orders and observe the corresponding published order.
+
+This is a scenario, not an invariant, because reversing the meaningful event order reverses the required output.
+
+### A repeated effect is a scenario
+
+**Context:** A client retries a payment request after losing the first response.
+
+- **Observer:** client and account holder
+- **Kind:** scenario
+
+`payment-request-processing.scenarios.md`:
+
+```md
+# Payment request processing
+
+## §1 Repeated requests
+
+### §1.1 An accepted request establishes the outcome of its retries
+
+After a payment request is accepted, retrying the same request returns its established outcome without creating another charge.
+```
+
+**Proof obligation:** Accept a request, retry the same request identity, and observe one charge and the established outcome.
+
+The retry has meaning only after the first request has been accepted. Internal delivery-attempt count is not part of this claim.
+
+### Compensation can be cross-cutting
+
+**Context:** Checkout coordinates payment authorization and order persistence. Authorization succeeds, but order persistence fails.
+
+- **Observer:** checkout caller and payment client
+- **Kind:** scenario
+- **Placement:** cross-cutting
+
+`--checkout-compensation.scenarios.md`:
+
+```md
+# Checkout compensation
 
 ## §1 Persistence failure
 
-### §1.1 Failed order persistence releases payment before checkout reports failure
+### §1.1 Failed persistence releases payment before checkout reports failure
 
 After payment authorization succeeds, if order persistence fails, the authorization is released before checkout reports failure.
 ```
 
-The proof controls authorization success and persistence failure, records the externally observable release and checkout result, and establishes that release precedes the reported failure. It does not require a particular transaction library, message transport, retry loop, or service topology.
+**Proof obligation:** Control authorization success and persistence failure, then observe that release precedes the reported checkout failure.
 
-This is a scenario because the authorization, persistence failure, release, and reported outcome have a meaningful order. It is cross-cutting because the compensation rule belongs to their interaction. Local payment claims may define what releasing an authorization means, and local order claims may define what failed persistence preserves, but neither should repeat this end-to-end rule.
+Neither payment authorization nor order persistence has this complete behavior alone. The interaction is the subject, so the claim belongs in `--checkout-compensation.scenarios.md` at the closest directory containing both local subjects. Local claims must not repeat this rule.
 
-## Concerns that do not warrant claims
+## Behaviors that do not warrant claims
 
-### A package exports its entry points
+Each example below fails at least one [claim criterion](./CLAIMS.md#deciding-whether-a-claim-is-warranted). Concerns outside this boundary remain outside Semantic Claims.
 
-**Context:** A build test imports each configured package entry to catch packaging mistakes.
+### Intended semantics are unresolved
 
-**Classification**
+**Candidate:** The current serializer emits fields alphabetically.
 
-- Semantic Claim warranted: no
-- Subject: package assembly
-- Observable behavior: configured entry points can be imported
+The order is observable, but repository evidence does not establish whether consumers may rely on it. No claim is warranted until a maintainer decides. If signatures require canonical alphabetical order, that accepted requirement may warrant an invariant.
 
-The existing test may verify only that packaging agrees with configuration. Unless a particular entry point is part of the intended public interface and its behavior needs a claim, maintainers gain little by repeating the export list as claims. How maintainers check package assembly is outside Semantic Claims.
+### No supported observer can distinguish the mechanism
 
-The user-visible capability reached through an entry point may warrant a claim. “The package exports `./search`” and “search results never publish stale work” answer different questions.
+**Candidate:** A private cache is cleared whenever source data changes.
 
-### A private cache invalidates on mutation
+Cache invalidation is not observable outside the private mechanism. A freshness guarantee at the subject's supported boundary may warrant a claim; the cache operation does not.
 
-**Context:** An implementation caches a derived value and invalidates the cache when its private data changes.
+### No meaningful outcome depends on the detail
 
-**Classification**
+**Candidate:** A diagnostic message currently ends with a period.
 
-- Semantic Claim warranted: no
-- Subject: the cache implementation
-- Observable behavior: none beyond the already claimed public result
+The punctuation is visible, but no supported consumer relies on it. It does not warrant a claim. If automation parses the exact message or law requires exact wording, the accepted text becomes part of the semantic contract.
 
-If the public result is already claimed to reflect current data, cache invalidation is one way to satisfy that claim. A separate cache claim would couple semantic meaning to an optimization.
+### The statement prescribes implementation
 
-If callers can actually observe stale data for a documented period, that freshness policy—not the cache mechanism—may warrant its own invariant or scenario.
+**Candidate:** Validation runs before insertion.
 
-## Proof cases without additional claims
+The statement fixes private control flow. The observable postcondition—for example, “Rejected duplicates leave the collection unchanged”—may warrant a claim independently of validation order.
 
-### Several examples exercise one boundary rule
+**Candidate:** The service stores records in PostgreSQL.
 
-**Context:** A range proof checks its lower endpoint, upper endpoint, interior values, and values outside the range.
+The storage choice is architecture, not necessarily observable behavior. A supported PostgreSQL protocol, transaction behavior, or compatibility promise may warrant a claim at its observable boundary.
 
-**Classification**
+### The outcome is not falsifiable
 
-- Semantic Claim warranted: yes, for the boundary rule
-- Claim kind: one invariant with multiple proof cases
-- Subject: the range
-- Observable behavior: both endpoints belong to the range
-- Proof obligation: exercise both endpoints and representative non-endpoint values as needed
+**Candidate:** Search results appear quickly.
 
-The proof may be table-driven and contain many cases. Test-case count does not determine claim count. Add a separate claim only when a case expresses another independently meaningful rule.
+“Quickly” does not identify a testable outcome. A defined latency threshold under a defined environment may warrant a claim if maintainers intend it as a service promise.
 
-## Project decisions outside Semantic Claims
+### Another claim already specifies the behavior
 
-### The service uses a particular storage system
+**Existing claim:** Both endpoints belong to the range.
 
-**Context:** Maintainers use an architecture document to record that a service uses PostgreSQL and why they chose it.
+**Candidate:** The lower endpoint belongs to the range.
 
-**Classification**
+The candidate repeats behavior already required by the stronger claim. It may be another proof case, but it is not a distinct claim.
 
-- Semantic Claim warranted: no
-- Subject: service architecture
-- Observable behavior: none necessarily
+## Choosing invariant or scenario
 
-The decision may be important for maintainers, deployment, or operations without being observable behavior the implementation must preserve. It therefore does not warrant a Semantic Claim; how maintainers record the decision is outside this method.
+The number of test steps does not determine claim kind. Relative event order does.
 
-If maintainers guarantee compatibility with PostgreSQL clients, transaction semantics, or a published query interface, state and prove that observable behavior rather than claiming the hidden technology choice.
+| Behavior | Kind | Reason |
+| --- | --- | --- |
+| Rejected input leaves accepted state unchanged. | Invariant | Rejection establishes a postcondition; no competing event order changes its meaning. |
+| The configured retry limit bounds total attempts. | Invariant | The bound holds whenever that configuration applies. |
+| Equal-ranked results retain arrival order. | Scenario | Reversing arrival order reverses the required result. |
+| An older completion cannot replace a newer search result. | Scenario | Start and completion order determine the required result. |
+| Closing a modal returns focus to its invoking control. | Scenario | The required outcome depends on focus, opening, and closing in that order. |
 
-## Changes that do not create new claims
+Temporal words alone do not make a scenario. “After rejection, accepted state is unchanged” can still express an invariant when event order is only test setup. Conversely, a standing policy may require a scenario when its meaning depends on which event occurred first.
 
-### A helper is renamed during a refactor
+## Choosing the subject and placement
 
-**Context:** A private helper receives a clearer name while all observable behavior remains unchanged.
+### Use the narrowest accurate subject
 
-**Classification**
+**Behavior:** An unread indicator becomes visible when unread notifications exist.
 
-- Semantic Claim warranted: no
-- Subject: private implementation organization
-- Observable behavior: none
+- `Notification icon` is accurate if only the icon makes this promise.
+- `Navigation menu` is too broad if its other elements are irrelevant.
+- `Notification state store` is inaccurate if it names the private mechanism rather than the observed indicator.
 
-The code change does not create new semantic meaning. Existing proofs should continue to establish the subject's behavior.
+### Use a local claim when one subject has the complete behavior
 
-### Equivalent algorithms replace one another
+“Expired credentials are rejected with status `401`” belongs to authentication responses. Other components may help produce the response, but the complete observable behavior can be stated about that one subject.
 
-**Context:** A linear search is replaced by an index while results and their promised ordering remain unchanged.
+### Use a cross-cutting claim only for interaction behavior
 
-**Classification**
+“Failed order persistence releases payment before checkout reports failure” cannot be stated completely about payment authorization or order persistence alone. Checkout compensation is the interaction subject.
 
-- Semantic Claim warranted: no new claim
-- Subject: lookup implementation
-- Observable behavior: unchanged
+A cross-cutting document must not summarize local payment and order claims. If it merely restates their local outcomes without specifying additional interaction behavior, it overlaps and should remain local.
 
-The implementation may change freely beneath existing claims. The chosen algorithm does not become observable semantics merely because performance motivated the refactor.
+## Choosing claim and proof boundaries
 
-## Borderline behavior
+### One claim may need several proof cases
 
-### A retry limit is configurable
+“Both endpoints belong to the range” may be proved with lower-endpoint and upper-endpoint cases across representative ranges. Those cases establish one boundary rule.
 
-**Context:** Operators can set a maximum retry count, and the current deployment uses three attempts.
+### One subject may need several claims
 
-**Classification**
+A retry controller may separately promise:
 
-- Semantic Claim warranted: maybe for configurability; no for the current configured value
-- Claim kind, if warranted: invariant
-- Subject: retry configuration
-- Observable behavior: depends on whether operators are promised control of the limit
-- Proof obligation, if warranted: set the retry limit and observe that the resulting attempts do not exceed it
+- The configured limit bounds total attempts.
+- After an operation succeeds, a later operation begins with the initial retry delay.
 
-“This deployment retries three times” does not by itself warrant a claim. “The configured retry limit bounds the number of attempts” may warrant an invariant if operator control is an intentional, stable observable interface.
+The limit and reset behavior can be understood and changed independently, so they are separate claims even if one test fixture exercises both.
 
-### Exact error wording
+### One proof identifies one claim
 
-Exact wording warrants a claim when another participant relies on it as a supported interface—for example, a command-line message parsed by external automation or legally required user-facing text. The literal wording is then part of the intended observable behavior.
+A test may share setup with tests for other claims, but each executable proof identifies one claim and asserts that claim's behavior. Shared setup does not merge the claims.
 
-When wording is merely today's copy, it does not warrant a claim. Prefer claiming the semantic distinction—such as which input is rejected and what state remains—over freezing prose accidentally.
+### Implementation structure does not determine claim count
 
-### Serialized field order
+Several files may realize one claim, and one file may help realize several claims. Claims are split by distinct observable semantics, not by functions, files, branches, or test cases.
 
-Field order warrants a claim when it affects a canonical representation, signature, byte-for-byte protocol, or another consumer-visible contract. A proof should observe that representation through the public serialization boundary.
+### A passing test may still fail to prove its claim
 
-When consumers treat fields as unordered and the current order comes from object construction, the order does not warrant a claim.
+For stale search results, a test that asserts only that both requests complete does not prove precedence. The proof must control the meaningful completion order and observe which result remains published. A failure caused by setup, syntax, or an unrelated exception also does not demonstrate the claimed distinction.
 
-### Performance thresholds
+## Scope and completeness
 
-A performance threshold may warrant a claim when it is a genuine user-facing or protocol-level promise and can be proved deterministically at the same abstraction level. The claim should state the observable service level, not the internal optimization used to meet it.
+Suppose a change concerns published search results and maintainers identify two warranted behaviors in that scope: newer searches take precedence, and cancelled searches never publish. Both belong in the scoped claim set.
 
-Exploratory goals, comparative improvements, and environment-sensitive measurements do not warrant Semantic Claims merely because they can be measured. A benchmark failure alone does not automatically establish a semantic regression.
+That claim set does not establish that every semantic behavior of search, cancellation, or the larger application has been discovered. Unclaimed behavior remains unspecified through this model rather than implicitly safe to change.
 
-### Log messages
+## Technical details at the semantic boundary
 
-A log message warrants a claim when it is a supported machine-consumed event or an operational contract on which another system depends. In that case, claim the event's observable schema and conditions.
+Technical details warrant claims only when an observer is meant to rely on them.
 
-Diagnostic wording intended only for maintainers does not ordinarily warrant a claim. Incidental punctuation and phrasing should not become semantic commitments through snapshot tests alone.
+| Detail | Warranted example | Unwarranted example |
+| --- | --- | --- |
+| Package entry point | Consumers are promised `./search` as a supported import path. | A build test merely checks that package output matches configuration. |
+| Error wording | Automation parses an exact message, or required user-facing text must match exactly. | The wording is editable diagnostic copy. |
+| Serialized field order | Order defines a signature, canonical representation, or byte protocol. | Consumers treat fields as unordered and current order is incidental. |
+| Performance threshold | A defined service level is promised and can be tested under defined conditions. | A benchmark records an exploratory goal or environment-sensitive comparison. |
+| Log event | Another system consumes a documented event schema and condition. | Maintainers read free-form diagnostic text. |
+| API or protocol token | Callers rely on a documented status, header, field, event, or sentinel. | The token names a private helper, exception, or event with no supported observer. |
 
-## Review questions
+## Existing systems and changes
 
-When claim decisions differ, reviewers can make the disagreement concrete:
+### Current behavior is evidence, not intent
 
-- Who observes this behavior?
-- What user, client, operator, or protocol outcome changes if it disappears?
-- Is that outcome intentional or merely present today?
-- Would an implementation using a different mechanism still need to preserve it?
-- Can the proof observe the behavior without inspecting private state?
-- Does another claim already preserve the same meaning?
-- Would the intent remain clear without a claim?
+If implementation and tests both alphabetize serialized fields but no requirement establishes the order, the behavior remains unresolved. A maintainer decides whether to preserve, change, or remove it before a claim is written.
 
-Do not maximize claim coverage. Specify every warranted observable behavior with the smallest coherent set of non-overlapping claims.
+### A bug report does not define the correction
+
+“The old search result replaced the new one” identifies an observed failure. Maintainers must still decide whether older work is blocked as soon as newer work starts or only after newer work completes. Each decision produces a different scenario.
+
+### A refactor does not create a claim
+
+Replacing linear search with an index creates no claim when results and every promised ordering rule remain unchanged. Existing claims remain in force; proofs may change only to observe the same behavior through the new implementation.
+
+### New semantics require a claim first
+
+If maintainers add a promise that cancelled work can never publish, that accepted behavior is evaluated independently, written as a claim, proved, and then implemented.
+
+## Complete decision sequence
+
+For each candidate behavior:
+
+1. Name the narrowest subject to which the complete behavior applies.
+2. Identify the observer and supported observation boundary.
+3. Determine whether a maintainer has accepted the behavior as intended semantics.
+4. Determine whether changing it would meaningfully change an outcome the observer may rely on.
+5. Remove private implementation and unsupported interface details from the statement.
+6. Confirm that an executable proof can distinguish satisfaction from violation at the same boundary.
+7. Check that no existing claim specifies the same outcome under the same conditions.
+8. Classify the claim as an invariant or scenario according to whether relative event order is semantic.
+9. Place it locally when one subject has the complete behavior; use `--` only when the interaction among several subjects is itself the subject.
+10. Split claims by independently meaningful behavior and proof cases by the evidence needed to establish each claim.
+
+A candidate is not ready to become a claim while its observer, intended status, meaningful outcome, implementation-independent wording, proof obligation, or distinctness remains unresolved.

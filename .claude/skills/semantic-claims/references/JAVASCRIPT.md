@@ -1,34 +1,34 @@
 # JavaScript and TypeScript Conventions
 
-In JavaScript and TypeScript projects, each claim document pairs with one proof file. Section and claim headings are repeated as test titles, giving the checker a direct link between the claim and its executable proofs.
+These conventions define how the `semantic-claims` checker links Markdown claim documents to JavaScript and TypeScript proof files. They supplement the [Semantic Claims Model](./SEMANTICS.md).
 
-The checker verifies that link. The project's test runner executes the proofs.
+The checker validates structural links, while the project's test runner executes the proofs.
 
-## File pairs
+## File pairing
 
-A claim document and its proof use the same name:
+Each claim document pairs with exactly one proof file in the same directory. The files share the same name through the claim kind:
 
-| Claim document        | Proof file                                            |
-| --------------------- | ----------------------------------------------------- |
-| `name.invariants.md`  | `name.invariants.test.ts`, `.test.mjs`, or `.test.js` |
-| `name.scenarios.md`   | `name.scenarios.test.ts`, `.test.mjs`, or `.test.js`  |
+| Claim document | Paired proof file |
+| --- | --- |
+| `name.invariants.md` | `name.invariants.test.ts`, `name.invariants.test.mjs`, or `name.invariants.test.js` |
+| `name.scenarios.md` | `name.scenarios.test.ts`, `name.scenarios.test.mjs`, or `name.scenarios.test.js` |
 
-Cross-cutting claim documents follow the same pattern with a `--` prefix:
+`name` must contain at least one character. Exactly one supported proof extension may exist for a claim document; multiple matching proof files are ambiguous. A proof file without its matching claim document is also invalid.
+
+Cross-cutting claim documents use the same pairing rule and retain their `--` prefix:
 
 ```text
---name.invariants.md
---name.invariants.test.ts
+--checkout-compensation.scenarios.md
+--checkout-compensation.scenarios.test.ts
 ```
 
-Each claim document has exactly one proof file. Providing both a TypeScript and JavaScript proof for the same document makes the pair ambiguous.
+These conventions apply to ESM JavaScript and TypeScript projects. Supported proof-file extensions are `.test.ts`, `.test.mjs`, and `.test.js`.
 
-JavaScript proof files use ESM. The supported proof extensions are `.test.ts`, `.test.mjs`, and `.test.js`.
+## Claim document structure
 
-## Linking claims to tests
+A claim document follows the format defined in [CLAIMS.md](./CLAIMS.md#document-structure), including a subject heading and a statement for every claim.
 
-A section heading maps to a `describe` title. A claim heading maps to an `it` or `test` title.
-
-Given this claim document:
+For structural validation, the checker recognizes section and claim headings outside fenced code blocks:
 
 ```md
 ## §1 Endpoint inclusion
@@ -38,7 +38,32 @@ Given this claim document:
 A value equal to either endpoint is included.
 ```
 
-Its proof repeats the identifiers and titles:
+Each document must contain:
+
+- at least one `## §N Title` section with a nonempty title;
+- at least one `### §N.M Title` claim with a nonempty title;
+- a unique identifier for every section and claim;
+- a declared section whose identifier matches the first component of each claim identifier.
+
+For example, claim `§2.3` belongs to section `§2`.
+
+## Proof structure
+
+A proof repeats each section identifier and title in a `describe` call. Each claim identifier and title appears in an `it` or `test` call nested inside the matching `describe` call.
+
+For `range.invariants.md`:
+
+```md
+# Range
+
+## §1 Endpoint inclusion
+
+### §1.1 Both endpoints belong to the range
+
+A value equal to either endpoint is included.
+```
+
+The paired `range.invariants.test.ts` contains:
 
 ```ts
 describe('§1 Endpoint inclusion', () => {
@@ -51,31 +76,44 @@ describe('§1 Endpoint inclusion', () => {
 });
 ```
 
-The wording after each identifier must match exactly. A separator such as `—`, `-`, or `:` may appear between the identifier and title in either file; the separator itself is not part of the title.
+The checker applies these rules:
 
-The claim proof belongs inside the `describe` block for its section. Several tests can prove the same claim by repeating its identifier and title.
+- Every `describe`, `it`, and `test` call in a named proof file must contain a recognized identifier and a nonempty title.
+- Each section appears in exactly one `describe` call.
+- Each claim appears in one or more executable `it` or `test` calls within its section.
+- Repeated tests for one claim use the same identifier and title.
+- Proof identifiers must exist in the paired claim document.
+- Titles must match the paired Markdown headings exactly.
 
-Skipped and pending tests do not count as proofs. Test titles must be literal strings, because computed or interpolated titles cannot be linked reliably.
+The structural separator between an identifier and title may be whitespace, `—`, `–`, `--`, `-`, or `:`. The separator is not part of the title and may differ between the claim document and proof.
 
-Every `describe`, `it`, and `test` call inside a named proof file is treated as part of the claim structure. Ordinary tests therefore belong in separate test files.
+Titles must be string literals or template literals without substitutions. Computed and interpolated titles cannot be linked. Calls marked with `.skip` or `.todo`, including calls inside a skipped or pending `describe`, do not count as executable proofs.
 
-## Checking the links
+All `describe`, `it`, and `test` calls in a named proof file belong to its claim structure. Tests that do not prove claims belong in other test files.
 
-The checker verifies:
+## Validation scope
 
-- that every claim document has one proof file, and every proof file has one claim document;
-- that section and claim identifiers exist and have titles;
-- that proof titles match their claim headings;
-- that each claim proof appears under the correct section;
-- that every claim has at least one executable proof.
-
-It does not run the proofs or decide whether they test the claimed behavior adequately. Those checks remain separate:
+The validation command accepts zero, one, or both claim kinds:
 
 ```text
-semantic-claims     -> checks claim-to-proof links
+semantic-claims [invariants] [scenarios]
+```
+
+With no kind argument, both invariants and scenarios are checked. One kind argument limits validation to that kind. Both kinds may be supplied in either order. Any unsupported argument rejects the invocation before validation begins.
+
+Validation starts at the current working directory and includes recognized files in its descendant directories. Directories whose names begin with `.` are skipped, as are `coverage`, `dist`, and `node_modules` directories.
+
+A successful check exits with status `0` and reports the number of validated pairs for each selected kind. A structural mismatch or unsupported invocation produces a nonzero status.
+
+## Validation boundary
+
+The checker verifies file pairing, identifier hierarchy, title equality, proof nesting, and the presence of executable proof entries. It does not execute tests, inspect assertions, or decide whether a proof establishes its claim.
+
+Complete verification therefore includes both commands:
+
+```text
+semantic-claims     -> validates claim-to-proof structure
 project test runner -> executes proofs
 ```
 
-Running `semantic-claims` checks invariants and scenarios. `semantic-claims invariants` and `semantic-claims scenarios` check one kind at a time.
-
-The package README contains installation instructions, package scripts, and current runtime support.
+Installation, package scripts, and supported runtimes are documented in the package README.
