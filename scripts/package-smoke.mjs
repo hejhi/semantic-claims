@@ -41,9 +41,11 @@ const EXPECTED_FILES = [
   'scripts/semantic-explorer/server.mjs',
 ];
 const EXPECTED_NAME = 'semantic-claims';
-const EXPECTED_VERSION = '0.1.0-alpha.0';
 const REPOSITORY_ROOT = fileURLToPath(
   new URL('../', import.meta.url),
+);
+const { version: EXPECTED_VERSION } = JSON.parse(
+  await readFile(path.join(REPOSITORY_ROOT, 'package.json'), 'utf8'),
 );
 
 function assert(condition, message) {
