@@ -2,7 +2,7 @@
 
 With the Semantic Claims Model, people and coding agents specify observable software behavior in plain language and prove it with tests. Claims and proofs become shared context for later implementation, maintenance, and review.
 
-See the [README](./README.md) for a high-level model run-through and a simple example.
+See the [README](./README.md) for run-through and a simple example.
 
 ## Motivation
 
@@ -14,11 +14,11 @@ We've all been there:
 - "Don't touch that code without first talking to X."
 - "What in God's name is this and why would anyone do it like this."
 
-Coding agents compound this problem, making it more visible and immediate. An agent can produce a convincing change quickly while relying on many small incorrect assumptions or incomplete context; tests are only as good as the understanding of the writer; engineers, designers, and product people can only hold so much context in their _own_ head at one time.
+Coding agents compound this problem, making it more visible and immediate. An agent can produce a convincing change quickly while relying on many small incorrect assumptions or incomplete context; tests are only as good as the understanding of the writer; engineers, designers, and product people can only hold so much context in their _own_ head at one time. Massive prose specs and design documents take up-front context, need to be maintained if they're to remain the source of truth, and when they intersect in functionality, there's a lot of room for subtle discrepencies and ambiguity.
 
 Semantic Claims was designed to help with this by baking essential semantics and intent into the fabric of the code itself, with the perspective that what's good for humans is good for agents.
 
-Human engineers can use this model without coding agents. It's useful whenever a team needs to define behavior clearly or make semantic changes easy to review. Making a meaningful change to observable behavior should cause a test to fail, prompting an analysis of the original claim to understand whether it's an intentional change or not. Separating claims from proofs means that updates to them require **both intention and attention**.
+Human engineers can use this model without coding agents. It's useful whenever a team needs to define behavior clearly or make semantic changes easy to review. Making a meaningful change to observable behavior should cause a test to fail, prompting an analysis of the original claim to understand whether it's an intentional change or not. Separating claims from proofs means that updates to them require updates to both, **demanding intention and attention**.
 
 ## What this project provides
 
@@ -50,10 +50,8 @@ Claims are Markdown and proofs are ordinary tests. Different languages and test 
 
 ## Repository guide
 
-- [SEMANTICS.md](./SEMANTICS.md): the shared method and authoring workflow.
-  - [SUBJECTS.md](./SUBJECTS.md): what claims are about.
-  - [INVARIANTS.md](./INVARIANTS.md): invariant claims.
-  - [SCENARIOS.md](./SCENARIOS.md): scenario claims.
+- [SEMANTICS.md](./SEMANTICS.md): the model, proofs, and authoring workflow.
+- [CLAIMS.md](./CLAIMS.md): [subjects](./CLAIMS.md#subjects), [claim criteria](./CLAIMS.md#deciding-whether-a-claim-is-warranted), [invariants](./CLAIMS.md#invariants), [scenarios](./CLAIMS.md#scenarios), and [claim documents](./CLAIMS.md#claim-documents).
 - [EXAMPLES.md](./EXAMPLES.md): claim-decision examples and borderline cases.
 - [EXISTING-SYSTEMS.md](./EXISTING-SYSTEMS.md): incremental adoption in existing systems.
 - [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.

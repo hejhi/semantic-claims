@@ -78,10 +78,8 @@ async function readTree(
 
 const sourceFiles = {
   'SEMANTICS.md': 'source semantics\n',
-  'SUBJECTS.md': 'source subjects\n',
+  'CLAIMS.md': 'source claims\n',
   'FAQ.md': 'source frequently asked questions\n',
-  'INVARIANTS.md': 'source invariants\n',
-  'SCENARIOS.md': 'source scenarios\n',
   'EXAMPLES.md': 'source examples\n',
   'EXISTING-SYSTEMS.md': 'source existing systems\n',
   'ELEPHANT-GOLDFISH.md': 'source elephant goldfish\n',
@@ -90,19 +88,17 @@ const sourceFiles = {
 };
 
 describe('§1 — Generated method references', () => {
-  test('§1.1 — Generated method references reproduce their source documents exactly', async () => {
+  test('§1.1 — Generated method references exactly match the configured source documents', async () => {
     const { root } = await runSynchronizer({
       ...sourceFiles,
+      '.agents/skills/semantic-claims/references/OBSOLETE.md':
+        'obsolete reference\n',
       '.agents/skills/semantic-claims/references/SEMANTICS.md':
         'stale semantics\n',
-      '.agents/skills/semantic-claims/references/SUBJECTS.md':
-        'stale subjects\n',
+      '.agents/skills/semantic-claims/references/CLAIMS.md':
+        'stale claims\n',
       '.agents/skills/semantic-claims/references/FAQ.md':
         'stale frequently asked questions\n',
-      '.agents/skills/semantic-claims/references/INVARIANTS.md':
-        'stale invariants\n',
-      '.agents/skills/semantic-claims/references/SCENARIOS.md':
-        'stale scenarios\n',
       '.agents/skills/semantic-claims/references/EXAMPLES.md':
         'stale examples\n',
       '.agents/skills/semantic-claims/references/EXISTING-SYSTEMS.md':
@@ -116,10 +112,8 @@ describe('§1 — Generated method references', () => {
     try {
       for (const document of [
         'SEMANTICS.md',
-        'SUBJECTS.md',
+        'CLAIMS.md',
         'FAQ.md',
-        'INVARIANTS.md',
-        'SCENARIOS.md',
         'EXAMPLES.md',
         'EXISTING-SYSTEMS.md',
         'ELEPHANT-GOLDFISH.md',
@@ -136,6 +130,21 @@ describe('§1 — Generated method references', () => {
         );
         expect(generated).toBe(source);
       }
+      expect(
+        (
+          await readdir(
+            path.join(root, '.agents/skills/semantic-claims/references'),
+          )
+        ).sort(),
+      ).toEqual([
+        'CLAIMS.md',
+        'ELEPHANT-GOLDFISH.md',
+        'EXAMPLES.md',
+        'EXISTING-SYSTEMS.md',
+        'FAQ.md',
+        'JAVASCRIPT.md',
+        'SEMANTICS.md',
+      ]);
     } finally {
       await rm(root, { force: true, recursive: true });
     }

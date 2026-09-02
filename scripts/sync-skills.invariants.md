@@ -4,9 +4,9 @@ Skill synchronization builds generated method references from the source documen
 
 ## §1 Generated method references
 
-### §1.1 Generated method references reproduce their source documents exactly
+### §1.1 Generated method references exactly match the configured source documents
 
-Every method document configured as a generated skill reference has the same content in the source skill as its repository source document after synchronization.
+After synchronization, the source skill contains one generated reference for every configured method document, with the same content as its repository source. It contains no unconfigured references.
 
 ## §2 Runtime skill mirrors
 

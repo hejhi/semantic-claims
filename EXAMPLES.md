@@ -1,6 +1,6 @@
 # Semantic Claim Decision Examples
 
-Use these examples to decide whether observable behavior warrants a Semantic Claim and, when it does, whether to write an invariant or scenario. Apply them with the criteria in [SEMANTICS.md](./SEMANTICS.md). The model does not prescribe what to do when no Semantic Claim is warranted.
+Use these examples to decide whether observable behavior warrants a Semantic Claim and, when it does, whether to write an invariant or scenario. Apply them with the [claim criteria](./CLAIMS.md#deciding-whether-a-claim-is-warranted). The model does not prescribe what to do when no Semantic Claim is warranted.
 
 The same observable behavior may warrant a claim in one product but not another. The deciding question is which behavior maintainers intend to guarantee, not what the current implementation happens to do.
 

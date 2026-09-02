@@ -10,12 +10,10 @@ Use this skill when work requires deciding which observable behavior warrants a 
 Always read:
 
 - [SEMANTICS.md](references/SEMANTICS.md)
-- [SUBJECTS.md](references/SUBJECTS.md)
+- [CLAIMS.md](references/CLAIMS.md)
 
 Then read only what the work requires:
 
-- [INVARIANTS.md](references/INVARIANTS.md) for invariant claims
-- [SCENARIOS.md](references/SCENARIOS.md) for scenario claims
 - [FAQ.md](references/FAQ.md) for comparisons with TDD or acceptance criteria
 - [EXAMPLES.md](references/EXAMPLES.md) when the need for a claim or its kind is uncertain
 - [EXISTING-SYSTEMS.md](references/EXISTING-SYSTEMS.md) before applying the model to an existing or partly specified system

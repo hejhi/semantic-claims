@@ -54,7 +54,7 @@ Relevant behavior falls into one of three categories.
 
 #### Intended semantics
 
-The behavior is intentional, observable, and understood well enough to evaluate against the [claim criteria](./SEMANTICS.md#deciding-whether-a-semantic-claim-is-warranted).
+The behavior is intentional, observable, and understood well enough to evaluate against the [claim criteria](./CLAIMS.md#deciding-whether-a-claim-is-warranted).
 
 #### Unresolved behavior
 

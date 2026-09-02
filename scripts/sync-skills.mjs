@@ -7,10 +7,8 @@ const SOURCE = '.agents/skills/semantic-claims';
 const TARGETS = ['.claude/skills/semantic-claims'];
 const SEMANTIC_CLAIMS_DOCS = [
   'SEMANTICS.md',
-  'SUBJECTS.md',
+  'CLAIMS.md',
   'FAQ.md',
-  'INVARIANTS.md',
-  'SCENARIOS.md',
   'EXAMPLES.md',
   'EXISTING-SYSTEMS.md',
   'ELEPHANT-GOLDFISH.md',
@@ -18,6 +16,7 @@ const SEMANTIC_CLAIMS_DOCS = [
 ];
 const semanticClaimsReferences = path.join(SOURCE, 'references');
 
+await rm(semanticClaimsReferences, { force: true, recursive: true });
 await mkdir(semanticClaimsReferences, { recursive: true });
 for (const document of SEMANTIC_CLAIMS_DOCS) {
   await copyFile(document, path.join(semanticClaimsReferences, document));

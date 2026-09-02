@@ -2,24 +2,63 @@
 
 With the Semantic Claims Model, important software behavior remains understandable and testable as code changes.
 
-It's for anyone (people, coding agents, sentient animals) who build, maintain, extend, or need to understand software over time. Its influences include TDD, invariants in code design, and Gherkin-style acceptance criteria.
+It's for anyone (people, coding agents, sentient animals) building, maintaining, extending, or needing to understand software over time. Its influences include TDD, invariants in code design, and Gherkin-style acceptance criteria.
 
-There's three pieces to it:
+There are three parts to it. For any given subject with observable behavior:
 
 ```text
-claim -> proof -> implementation
+claim -> prove -> implement
 ```
 
-## Claims and proofs
+Steps:
+
+1. **claim**: describe meaningful observable behavior for a given subject in a plain-language Markdown document.
+2. **prove**: write tests that exercise the claimed behavior.
+3. **implement**: write the code until the proofs pass.
+
+This workflow produces three artifacts, kept together with the subject they describe. For example, in a JS or TS project, that might look like:
+
+```text
+search/
+├── search-results.scenarios.md
+├── search-results.scenarios.test.ts
+└── search-results.ts
+```
+
+The Markdown file contains the claims, the test file the executable proofs, and the implementation itself. This way, as a codebase grows, intent remains colocated and up-to-date with implementations. If a proof fails, it should prompt a review of the three artifacts—it's a flag that meaningful observable behavior may have changed.
+
+There's also tooling provided to help keep claims and proofs well-formed. At the moment, there's a JS/TS CLI-run checker verifying that claim documents and proof files have matching identifiers and titles. It uses the [JS and TS conventions](./JAVASCRIPT.md) to match claims with proofs and report structural mismatches.
+
+This simple method:
+
+- greatly improves the ability to onboard and reason through a codebase
+- provides surgical context needed for implementations
+- colocates and encodes intent as actual test coverage
+- provides a semantic layer on top of regular TDD without displacing it
+
+It also makes work easier to delegate to agents by giving them well-formed semantics _before_ implementation. A good strategy is to:
+- write claims with an expert agent first, get alignment, then commit them
+- have an implementation agent write the proofs off those claims, then write the implementation
+- review the diff with the expert to spot any changes to the committed claims, which should be bright and obvious
+
+Rinse and repeat, iterating on the claims and locking them each time before handing them off to implementation agents. This makes it easier to review for one agent, and easier to implement for the other.
+
+However, Semantic Claims are only as useful as their claims and proofs. A claim can still be ambiguous, and a test can still fail to prove what it claims. Regardless, the plain-language step encourages deciding observable semantics up front, which is especially useful when delegating implementation work later.
+
+## In practice
 
 ### Claims
 
-**Claims** are Markdown documents claiming the observable behavior of a given subject.
+**Claim documents** use plain-language claims to describe the meaningful observable behavior of a single [**subject**](./CLAIMS.md#subjects). A subject can be anything whose semantics can be expressed as observable behavior. Together, its claims form its semantic contract.
 
-For example, suppose a newer search must take precedence over an older search still in progress. In a claim document named `search.scenarios.md`, that behavior can be _claimed_:
+Side note: "subject" may sound ambiguous, but it was loosely inspired by grammar: a subject followed by a predicate. The subject names the thing whose semantics are being specified, and the predicate expresses those semantics as observable behavior. Together, they form a claim.
+
+In this example, the subject is `Search results`, and its claim document is `search/search-results.scenarios.md`.
+
+This example claims one meaningful observable behavior:
 
 ```md
-# Search filter
+# Search results
 
 ## §1 Search precedence
 
@@ -28,25 +67,39 @@ For example, suppose a newer search must take precedence over an older search st
 After a newer search begins, completing an older search leaves the latest result unchanged.
 ```
 
-Breaking down the anatomy of the claim document:
+This demonstrates a (non-exhaustive) minimal, well-formed claim document:
 
-1. `Search filter` is the [**subject**](./SUBJECTS.md) of claims.
-2. `Search precedence` is a **claim set** grouping one or more claims together
-3. `Newer searches supersede...` is a **claim**
-4. `After a newer search begins...` is the **observable behavior** being claimed
+1. `Search results` is the **subject** of the claims.
+2. `Search precedence` is a **claim set**, grouping one or more claims together.
+3. `Newer searches supersede...` is a single **claim**.
+4. `After a newer search begins...` is the **observable behavior** being claimed.
 
-Claims do _not_ describe APIs, libraries, or implementation details—notice there's no code references in the claim document above. Claims _only_ specify semantics that can be expressed as observable behavior. This allows implementations to change without needing to constantly adjust underlying semantics—as long as the observable behavior remains the same, the claim itself doesn't need to change; only the proof might.
+There aren't any code references in the above, as claims are about testable observable behavior that doesn't become stale rather than implementation details like API shapes that might change.
+
+When paired with proofs, claims allow implementations for a given subject to change _without needing to adjust underlying semantics_. As long as the observable behavior remains the same, the claim itself doesn't need to change.
 
 There are two kinds of claims:
 
-- An **invariant** describes a constant truth.
-- A **scenario** describes behavior whose meaning depends on event order.
+- An [**invariant**](./CLAIMS.md#invariants) is a statement describing a single constant behavior.
+- A [**scenario**](./CLAIMS.md#scenarios) describes behavior whose meaning depends on event order.
 
-There is also another type of claim, known as **cross-cutting**, for when observable behavior exists between multiple subjects. Cross-cutting claim documents get placed at the closest shared boundary, and prefixed with `--` (for example, `--name.invariants.md`).
+There are also **cross-cutting** claims for observable behavior that belongs to an interaction among multiple subjects rather than any one subject alone. For example, a claim about the interaction between the search filter and published results would extend the same tree like this:
+
+```text
+search/
+├── --search-submission.scenarios.md
+├── --search-submission.scenarios.test.ts
+├── search-filter.ts
+├── search-results.scenarios.md
+├── search-results.scenarios.test.ts
+└── search-results.ts
+```
+
+The cross-cutting claim sits in `search/`, the closest directory containing files for both subjects. Its `--` prefix distinguishes it from claims about either local subject.
 
 ### Proofs
 
-Each claim document has a paired **proof** file. A proof tests each claim by actually exercising each observable behavior in the claim document. Following JS/TS conventions, the paired proof would be named `search.scenarios.test.ts`, which match the section and claim titles from the claim document _exactly_:
+Each claim document has a paired **proof** file. A proof verifies each claim by exercising each observable behavior in a test. Following JS/TS conventions, the paired proof would be named `search/search-results.scenarios.test.ts`, which matches the section and claim titles from the claim document _exactly_:
 
 ```ts
 describe('§1 Search precedence', () => {
@@ -63,40 +116,18 @@ describe('§1 Search precedence', () => {
 });
 ```
 
-Note: This repository includes [JS and TS conventions](./JAVASCRIPT.md) that work with a provided checker, which verifies in a project that shared identifiers and matching titles connect each claim to its proof, and flags any mismatches.
-
-Claims and proofs should be colocated with a subject's implementation.
-
-## Method
-
-Revisiting this:
-
-```text
-claim -> proof -> implementation
-```
-
-That's also the intended _sequence_ for authoring, which follows a TDD-like method:
-
-1. **claim**: write the claims for a subject
-2. **prove**: write the proofs for the claims
-3. **implement**: write the implementation to fit the proof
-
-It's expected that, when following this order, proofs should fail until the implementation is actually written—also TDD-like.
-
-The set of all three—claims, proofs, and implementation—form a discrete unit of context and unambiguous intent that gets colocated with the implementation.
+Claims and proofs get colocated with the implementation for the subject.
 
 ## Explore the repo
 
 1. [OVERVIEW.md](./OVERVIEW.md): motivation and repo guide.
 2. [FAQ.md](./FAQ.md): common questions about Semantic Claims, TDD, and acceptance criteria.
-3. [SEMANTICS.md](./SEMANTICS.md): the shared method.
-4. [SUBJECTS.md](./SUBJECTS.md): what claims are about.
-5. [INVARIANTS.md](./INVARIANTS.md): standing claims.
-6. [SCENARIOS.md](./SCENARIOS.md): ordered claims.
-7. [EXAMPLES.md](./EXAMPLES.md): claim-decision examples and borderline cases.
-8. [EXISTING-SYSTEMS.md](./EXISTING-SYSTEMS.md): incremental adoption without inferring claims from implementation.
-9. [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.
-10. [ELEPHANT-GOLDFISH.md](./ELEPHANT-GOLDFISH.md): using Semantic Claims within the Elephant-Goldfish development process.
+3. [SEMANTICS.md](./SEMANTICS.md): the model, proofs, and authoring workflow.
+4. [CLAIMS.md](./CLAIMS.md): [subjects](./CLAIMS.md#subjects), [claim criteria](./CLAIMS.md#deciding-whether-a-claim-is-warranted), [invariants](./CLAIMS.md#invariants), [scenarios](./CLAIMS.md#scenarios), and [claim documents](./CLAIMS.md#claim-documents).
+5. [EXAMPLES.md](./EXAMPLES.md): claim-decision examples and borderline cases.
+6. [EXISTING-SYSTEMS.md](./EXISTING-SYSTEMS.md): incremental adoption without inferring claims from implementation.
+7. [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.
+8. [ELEPHANT-GOLDFISH.md](./ELEPHANT-GOLDFISH.md): using Semantic Claims within the Elephant-Goldfish development process.
 
 ## Tooling
 
@@ -129,7 +160,7 @@ The checker verifies the links between claim documents and proof files, includin
 npm run check:semantics
 ```
 
-Proofs are just normal tests and should run when you run your tests as usual.
+Proofs are just normal tests and should run as part of your test harness.
 
 The [JS and TS conventions](./JAVASCRIPT.md) define the supported filenames and the exact links between claims and proofs.
 
@@ -149,7 +180,12 @@ The command checks the claim links, starts a read-only local server, and prints 
 
 ### Add an agent skill
 
-There's also an [agent skill](./.agents/skills/semantic-claims) available at `.agents/skills/semantic-claims/`. You can copy that directory to the location used by your project's coding agent.
+This repository includes equivalent project-local skills for Codex and Claude Code. Copy the complete directory for the agent you use into the same path in your project:
+
+- Codex: `.agents/skills/semantic-claims/`
+- Claude Code: `.claude/skills/semantic-claims/`
+
+The skill guides the agent through identifying subjects, investigating observable behavior, proposing claims and proofs, and implementing semantics that you have accepted. Keeping the skill in the project makes its instructions versioned and visible in ordinary Git review.
 
 ### Remove it
 
