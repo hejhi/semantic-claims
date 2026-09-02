@@ -27,7 +27,7 @@ search/
 
 The Markdown file contains the claims, the test file the executable proofs, and the implementation itself. This way, as a codebase grows, intent remains colocated and up-to-date with implementations. If a proof fails, it should prompt a review of the three artifacts—it's a flag that meaningful observable behavior may have changed.
 
-There's also tooling provided to help keep claims and proofs well-formed. At the moment, there's a JS/TS CLI-run checker verifying that claim documents and proof files have matching identifiers and titles. It uses the [JS and TS conventions](./JAVASCRIPT.md) to match claims with proofs and report structural mismatches.
+There's also tooling provided to help keep claims and proofs well-formed. At the moment, there's a JS/TS CLI-run checker verifying that claim documents and proof files have matching identifiers and titles. It uses the [JS and TS conventions](https://github.com/hejhi/semantic-claims/blob/main/JAVASCRIPT.md) to match claims with proofs and report structural mismatches.
 
 This simple method:
 
@@ -49,7 +49,7 @@ However, Semantic Claims are only as useful as their claims and proofs. A claim 
 
 ### Claim documents
 
-Claim documents are well-formed Markdown files written in plain language that describe meaningful observable behavior through claims. A claim describes the observable behavior of something. We call that thing its [**subject**](./REFERENCE.md#subjects). A subject might be a system, function, component, protocol, user-interface element, or an interaction among several parts of a system.
+Claim documents are well-formed Markdown files written in plain language that describe meaningful observable behavior through claims. A claim describes the observable behavior of something. We call that thing its [**subject**](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#subjects). A subject might be a system, function, component, protocol, user-interface element, or an interaction among several parts of a system.
 
 In the below example, the subject is `Search results`, and its claim document is `search/search-results.scenarios.md`. This example claims one observable behavior:
 
@@ -78,8 +78,8 @@ When paired with proofs, claims allow implementations for a given subject to cha
 
 There are two kinds of claims:
 
-- An [**invariant**](./REFERENCE.md#choosing-between-invariants-and-scenarios) is a statement describing a single constant behavior.
-- A [**scenario**](./REFERENCE.md#choosing-between-invariants-and-scenarios) describes behavior whose meaning depends on event order.
+- An [**invariant**](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#choosing-between-invariants-and-scenarios) is a statement describing a single constant behavior.
+- A [**scenario**](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#choosing-between-invariants-and-scenarios) describes behavior whose meaning depends on event order.
 
 Write invariants as direct statements. For scenarios, Given/When/Then often makes the conditions, events, and outcome easier to follow.
 
@@ -120,18 +120,18 @@ Claims and proofs get colocated with the implementation for the subject.
 
 ## Explore the repo
 
-1. [OVERVIEW.md](./OVERVIEW.md): motivation and repo guide.
-2. [FAQ.md](./FAQ.md): common questions about Semantic Claims, TDD, and acceptance criteria.
-3. [REFERENCE.md](./REFERENCE.md): the detailed rules for claims, proofs, document structure, and the authoring workflow.
-4. [EXAMPLES.md](./EXAMPLES.md): claim-decision examples and borderline cases.
-5. [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.
-6. [ELEPHANT-GOLDFISH.md](./ELEPHANT-GOLDFISH.md): using Semantic Claims within the Elephant-Goldfish development process.
+1. [OVERVIEW.md](https://github.com/hejhi/semantic-claims/blob/main/OVERVIEW.md): motivation and repo guide.
+2. [FAQ.md](https://github.com/hejhi/semantic-claims/blob/main/FAQ.md): common questions about Semantic Claims, TDD, and acceptance criteria.
+3. [REFERENCE.md](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md): the detailed rules for claims, proofs, document structure, and the authoring workflow.
+4. [EXAMPLES.md](https://github.com/hejhi/semantic-claims/blob/main/EXAMPLES.md): claim-decision examples and borderline cases.
+5. [JAVASCRIPT.md](https://github.com/hejhi/semantic-claims/blob/main/JAVASCRIPT.md): the JavaScript and TypeScript conventions.
+6. [ELEPHANT-GOLDFISH.md](https://github.com/hejhi/semantic-claims/blob/main/ELEPHANT-GOLDFISH.md): using Semantic Claims within the Elephant-Goldfish development process.
 
 ## Tooling
 
-The repo also includes a [JS and TS claim checker and local Semantic Explorer](./scripts/check-semantics.mjs), plus [agent skills](./.agents/skills/semantic-claims) that can be used to help integrate the method into development workflows.
+The repo also includes a [JS and TS claim checker and local Semantic Explorer](https://github.com/hejhi/semantic-claims/blob/main/scripts/check-semantics.mjs), plus [agent skills](https://github.com/hejhi/semantic-claims/tree/main/.agents/skills/semantic-claims) that can be used to help integrate the method into development workflows.
 
-Fun fact: Semantic Claims were used to build the [validation scripts](./scripts), if you want to see the model in action.
+Fun fact: Semantic Claims were used to build the [validation scripts](https://github.com/hejhi/semantic-claims/tree/main/scripts), if you want to see the model in action.
 
 You can install the (alpha) checker as a dev dependency:
 
@@ -160,7 +160,7 @@ npm run check:semantics
 
 Proofs are just normal tests and should run as part of your test harness.
 
-The [JS and TS conventions](./JAVASCRIPT.md) define the supported filenames and the exact links between claims and proofs.
+The [JS and TS conventions](https://github.com/hejhi/semantic-claims/blob/main/JAVASCRIPT.md) define the supported filenames and the exact links between claims and proofs.
 
 The commands `semantic-claims invariants` and `semantic-claims scenarios` are also available when only one claim kind needs checking.
 
@@ -174,7 +174,7 @@ npm run explore:semantics
 
 The command checks the claim links, starts a read-only local server, and prints the URL. The explorer is a nice little dashboard that groups claims by subject and supports filtering by claim kind, cross-cutting status, and text. Restart it to pick up file changes.
 
-![Semantic Explorer showing claims grouped by subject](./assets/semantic-explorer.png)
+![Semantic Explorer showing claims grouped by subject](https://raw.githubusercontent.com/hejhi/semantic-claims/main/assets/semantic-explorer.png)
 
 ### Add an agent skill
 

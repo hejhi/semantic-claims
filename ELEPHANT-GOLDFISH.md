@@ -16,7 +16,7 @@ With design included:
 design intent -> claim -> proof -> implementation
 ```
 
-The design covers the problem, decisions, architecture, and proposed work. A design can then be decomosed into subjects, with claims specifying the intended semantics as observable behavior.
+The design covers the problem, decisions, architecture, and proposed work. You can then organize it into subjects, with claims specifying the intended observable behavior.
 
 The following sections explain where Semantic Claims can fit into EGM (without restating the full EGM process—read the article!).
 
@@ -30,7 +30,7 @@ During the first technical proposal, the proposed work can be compared with exis
 
 ## Phase 2: teaching the design
 
-After the problem and technical approach are understood, but _before_ any detailed implementation plan is finalized, the proposal can be decomposed semantically. For each important observable behavior, a decision can be made on whether it warrants a Semantic Claim and, if so, whether that claim is an invariant or scenario.
+After the problem and technical approach are understood, but _before_ any detailed implementation plan is finalized, organize the proposal into subjects and candidate claims. For each important observable behavior, decide whether it warrants a Semantic Claim and, if so, whether that claim is an invariant or scenario.
 
 As mentioned in other docs, claims precede proofs and implementations. So, as part of the detailed implementation plan created in this step, new and updated claim documents can be enumerated alongside the other work called for by the design.
 
@@ -53,7 +53,7 @@ If a fresh agent can interpret the design correctly, the written context no long
 
 ## Phase 4: implementing from the design
 
-Implementation can now follow the semantic order:
+Implementation can now follow the claim-first order:
 
 ```text
 claim -> proof -> implementation
@@ -61,20 +61,20 @@ claim -> proof -> implementation
 
 Once the claims are finalized, their proofs can be written, and it can be confirmed that new proofs fail as expected (as they're missing the implementation). Then the feature can be implemented, and the claim checker run with the relevant project checks to make sure that claims and proofs are still aligned.
 
-The design remains important, but “follow the plan” isn't the final correctness condition anymore. If someone finds a conflict among the plan, the claims, and the observable behavior users need, the design can be returned to and any issues resolved explicitly.
+The design remains important, but “follow the plan” isn't the final correctness condition anymore. If review uncovers a conflict among the plan, the claims, and the observable behavior users need, return to the design and resolve it explicitly.
 
 ## Existing systems and temporary READMEs
 
-See [EXISTING-SYSTEMS.md](./EXISTING-SYSTEMS.md) for the broader incremental-adoption method, including how to distinguish confirmed intent from behavior merely observed in code and tests.
+You can add claims to an existing system incrementally. Current code and tests show what happens today, but they don't establish by themselves what should happen. Decide whether the behavior [needs a claim](./REFERENCE.md#deciding-whether-a-behavior-needs-a-claim) before writing one.
 
-Rensin proposes recursively generated READMEs as temporary context for systems without enough design documentation. However, Semantic Claims can reduce the amount an agent must infer from code because they contain reviewed statements of observable behavior.
+Rensin proposes recursively generated READMEs as temporary context for systems without enough design documentation. However, reviewed claims can reduce the amount an agent must infer from code because they state observable behavior directly.
 
-Claim documents specify the semantics of individual subjects, while `--name` claim documents specify distinct cross-cutting behavior that provides system-level context. Neither type needs to inventory files or explain architecture; a good test is to see what an agent can infer from reading solely the claims and proofs without looking at any implementation at all.
+Claim documents specify the intended observable behavior of individual subjects, while `--name` claim documents specify distinct cross-cutting behavior that provides system-level context. Neither type needs to inventory files or explain architecture; a good test is to see what an agent can infer from reading solely the claims and proofs without looking at any implementation at all.
 
 In other words, with Semantic Claims, you may not need these temporary READMEs.
 
 ## How they relate
 
-Semantic Claims covers observable behavior, executable proofs, local context, and visible semantic changes. EGM covers the larger iterative process of questioning assumptions, developing a design, testing it with fresh agents, and managing implementation work.
+The Semantic Claims Model covers observable behavior, executable proofs, local context, and visible changes to intended behavior. EGM covers the larger iterative process of questioning assumptions, developing a design, testing it with fresh agents, and managing implementation work.
 
-They complement each other—EGM helps people reach the understanding needed to write strong claims, and Semantic Claims record meaningful observable behavior that later agents and implementations must respect.
+They complement each other—teams can use EGM to develop the understanding needed to write strong claims. Those claims contain a durable record of meaningful observable behavior that later agents must respect and later implementations must satisfy.

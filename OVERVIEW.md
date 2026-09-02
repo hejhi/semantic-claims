@@ -6,7 +6,7 @@ See the [README](./README.md) for run-through and a simple example.
 
 ## Motivation
 
-Long before coding agents, people recorded important software intent across code, comments, tests, requirements, design documents, issue history, and memory. Whether it's doing a context transfer, brain dump, or front-loading context into a fresh agent chat, that context must come together at some point before someone can confidently change existing behavior. The less this context has been preserved, the more stale it gets, and the more documented behavior conflicts in subtle ways across multiple sources, the less confident _anyone_ can be about the original intent and meaning of something.
+Long before coding agents, people recorded important software intent across code, comments, tests, requirements, design documents, issue history, and memory. Whether you're transferring context, writing a brain dump, or front-loading a fresh agent chat, you have to bring that context together before you can confidently change existing behavior. When little of it was preserved—or when the surviving sources are stale or subtly conflict—recovering the original intent becomes much harder.
 
 We've all been there:
 
@@ -14,11 +14,11 @@ We've all been there:
 - "Don't touch that code without first talking to X."
 - "What in God's name is this and why would anyone do it like this."
 
-Coding agents compound this problem, making it more visible and immediate. An agent can produce a convincing change quickly while relying on many small incorrect assumptions or incomplete context; tests are only as good as the understanding of the writer; engineers, designers, and product people can only hold so much context in their _own_ head at one time. Massive prose specs and design documents take up-front context, need to be maintained if they're to remain the source of truth, and when they intersect in functionality, there's a lot of room for subtle discrepencies and ambiguity.
+Coding agents compound this problem, making it more visible and immediate. An agent can produce a convincing change quickly while relying on many small incorrect assumptions or incomplete context; tests are only as good as the writer's understanding; engineers, designers, and product managers can each hold only so much context at once. Massive prose specs and design documents take up-front context, need to be maintained if they're to remain the source of truth, and when they intersect in functionality, there's a lot of room for subtle discrepencies and ambiguity.
 
-Semantic Claims was designed to help with this by baking essential semantics and intent into the fabric of the code itself, with the perspective that what's good for humans is good for agents.
+Semantic Claims was designed to help with this by keeping essential intended behavior beside the code, with the perspective that what's good for humans is good for agents.
 
-Human engineers can use this model without coding agents. It's useful whenever a team needs to define behavior clearly or make semantic changes easy to review. Making a meaningful change to observable behavior should cause a test to fail, prompting an analysis of the original claim to understand whether it's an intentional change or not. Separating claims from proofs means that updates to them require updates to both, **demanding intention and attention**.
+Human engineers can use this model without coding agents. It's useful whenever a team needs to define behavior clearly or make changes to intended behavior easy to review. Making a meaningful change to observable behavior should cause a test to fail, prompting an analysis of the original claim to understand whether it's an intentional change or not. Separating claims from proofs means that updates to them require updates to both, **demanding intention and attention**.
 
 ## What this project provides
 
@@ -32,9 +32,9 @@ A contributor can begin with the claims and proofs beside the subject, then read
 
 An agent receives plain-language behavior and executable expectations before implementation. It needs fewer assumptions about intent and can verify its work against an agreed result. Agents with higher intelligence with human oversight can author claims from technical designs, while delegating to agents with lower-intelligence to write proofs and implementations aligning with the claims.
 
-### Visible semantic changes
+### Visible changes to intended behavior
 
-In version tracking, creating and updating claims, proofs, and implementations for a semantic change appear in one reviewable diff. Reviewers can spot a changed test or implementation that lacks a corresponding claim update, or an implementation that no longer aligns semantically to claims or tests that haven't been updated appropriately.
+In version tracking, updates to claims, proofs, and implementations for a change to intended behavior appear in one reviewable diff. Reviewers can spot a changed proof or implementation without a corresponding claim update and check whether the implementation still satisfies the claims.
 
 ### Explicit purpose for important tests
 
@@ -42,7 +42,7 @@ Stable identifiers connect each claim to its proofs. A reader can see why a test
 
 ### Shared vocabulary
 
-Claims use the ordinary language of their subject, and require thinking about semantics up-front, before implementation. Planning, implementation, testing, and review can refer to the same behavior in the same terms.
+Claims use the ordinary language of their subject and require deciding intended behavior up front, before implementation. Planning, implementation, testing, and review can refer to the same behavior in the same terms.
 
 ### Independence from a particular agent or language
 
@@ -50,10 +50,8 @@ Claims are Markdown and proofs are ordinary tests. Different languages and test 
 
 ## Repository guide
 
-- [SEMANTICS.md](./SEMANTICS.md): the model, proofs, and authoring workflow.
-- [CLAIMS.md](./CLAIMS.md): [subjects](./CLAIMS.md#subjects), [claim criteria](./CLAIMS.md#deciding-whether-a-claim-is-warranted), [invariants](./CLAIMS.md#invariants), [scenarios](./CLAIMS.md#scenarios), and [claim documents](./CLAIMS.md#claim-documents).
+- [REFERENCE.md](./REFERENCE.md): the detailed rules for claims, proofs, document structure, and the authoring workflow.
 - [EXAMPLES.md](./EXAMPLES.md): claim-decision examples and borderline cases.
-- [EXISTING-SYSTEMS.md](./EXISTING-SYSTEMS.md): incremental adoption in existing systems.
 - [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.
 - [FAQ.md](./FAQ.md): common questions about Semantic Claims, TDD, and acceptance criteria.
 - [ELEPHANT-GOLDFISH.md](./ELEPHANT-GOLDFISH.md): using Semantic Claims within the Elephant-Goldfish development process.

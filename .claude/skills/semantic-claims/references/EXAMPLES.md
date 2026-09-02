@@ -2,7 +2,7 @@
 
 These examples cover the decisions required by the Semantic Claims Model. They are exhaustive with respect to the decision process, not the kinds of software behavior that may be claimed.
 
-Each classification assumes the stated intent. The same current behavior may warrant a claim in one system and remain unclaimed in another because maintainers intend different semantic contracts.
+Each classification assumes the stated intent. The same current behavior may warrant a claim in one system and remain unclaimed in another because each system has a different intended semantic contract.
 
 Warranted examples include the complete Markdown claim document. Proof obligations remain independent of any language or test framework; [JAVASCRIPT.md](./JAVASCRIPT.md) shows how JavaScript and TypeScript projects link these documents to executable proofs.
 
@@ -93,7 +93,9 @@ The exact token belongs in the claim because clients are meant to rely on it. An
 
 ### §1.1 Newer searches supersede older results
 
-After a newer search begins, completing an older search leaves the latest result unchanged.
+**Given** an older search is in progress,
+**When** a newer search begins and the older search later completes,
+**Then** the older result doesn't replace the latest result.
 ```
 
 **Proof obligation:** Start two searches, control both completion orders, and observe that the older completion never replaces the newer result.
@@ -116,7 +118,9 @@ Start and completion order determine the expected result. Real network timing, c
 
 ### §1.1 Equal-ranked results retain arrival order
 
-When equally ranked results arrive in sequence, they are published in that order.
+**Given** several results have equal rank,
+**When** they arrive in a particular order,
+**Then** they're published in that order.
 ```
 
 **Proof obligation:** Supply equal-ranked results in different arrival orders and observe the corresponding published order.
@@ -139,7 +143,9 @@ This is a scenario, not an invariant, because reversing the meaningful event ord
 
 ### §1.1 An accepted request establishes the outcome of its retries
 
-After a payment request is accepted, retrying the same request returns its established outcome without creating another charge.
+**Given** a payment request has been accepted,
+**When** the client retries the same request,
+**Then** it receives the established outcome without creating another charge.
 ```
 
 **Proof obligation:** Accept a request, retry the same request identity, and observe one charge and the established outcome.
@@ -163,7 +169,9 @@ The retry has meaning only after the first request has been accepted. Internal d
 
 ### §1.1 Failed persistence releases payment before checkout reports failure
 
-After payment authorization succeeds, if order persistence fails, the authorization is released before checkout reports failure.
+**Given** payment authorization has succeeded,
+**When** order persistence fails,
+**Then** the authorization is released before checkout reports failure.
 ```
 
 **Proof obligation:** Control authorization success and persistence failure, then observe that release precedes the reported checkout failure.
@@ -172,13 +180,13 @@ Neither payment authorization nor order persistence has this complete behavior a
 
 ## Behaviors that do not warrant claims
 
-Each example below fails at least one [claim criterion](./CLAIMS.md#deciding-whether-a-claim-is-warranted). Concerns outside this boundary remain outside Semantic Claims.
+Each example below falls outside the [claim boundary](./REFERENCE.md#deciding-whether-a-behavior-needs-a-claim). Concerns outside this boundary remain outside Semantic Claims.
 
 ### Intended semantics are unresolved
 
 **Candidate:** The current serializer emits fields alphabetically.
 
-The order is observable, but repository evidence does not establish whether consumers may rely on it. No claim is warranted until a maintainer decides. If signatures require canonical alphabetical order, that accepted requirement may warrant an invariant.
+The order is observable, but repository evidence does not establish whether consumers may rely on it. No claim is warranted unless the order is part of the intended semantics. If signatures require canonical alphabetical order, that accepted requirement may warrant an invariant.
 
 ### No supported observer can distinguish the mechanism
 
@@ -206,7 +214,7 @@ The storage choice is architecture, not necessarily observable behavior. A suppo
 
 **Candidate:** Search results appear quickly.
 
-“Quickly” does not identify a testable outcome. A defined latency threshold under a defined environment may warrant a claim if maintainers intend it as a service promise.
+“Quickly” does not identify a testable outcome. A defined latency threshold under a defined environment may warrant a claim if it is an intended service promise.
 
 ### Another claim already specifies the behavior
 
@@ -271,7 +279,7 @@ A test may share setup with tests for other claims, but each executable proof id
 
 ### Implementation structure does not determine claim count
 
-Several files may realize one claim, and one file may help realize several claims. Claims are split by distinct observable semantics, not by functions, files, branches, or test cases.
+Several files may realize one claim, and one file may help realize several claims. Claims are split by distinct observable behaviors, not by functions, files, branches, or test cases.
 
 ### A passing test may still fail to prove its claim
 
@@ -279,11 +287,11 @@ For stale search results, a test that asserts only that both requests complete d
 
 ## Scope and completeness
 
-Suppose a change concerns published search results and maintainers identify two warranted behaviors in that scope: newer searches take precedence, and cancelled searches never publish. Both belong in the scoped claim set.
+Suppose a change to published search results includes two warranted behaviors: newer searches take precedence, and cancelled searches never publish. Both belong in the scoped claim set.
 
-That claim set does not establish that every semantic behavior of search, cancellation, or the larger application has been discovered. Unclaimed behavior remains unspecified through this model rather than implicitly safe to change.
+That claim set does not establish that every warranted behavior of search, cancellation, or the larger application has been identified. Unclaimed behavior remains unspecified through this model rather than implicitly safe to change.
 
-## Technical details at the semantic boundary
+## Technical details at an observable boundary
 
 Technical details warrant claims only when an observer is meant to rely on them.
 
@@ -293,26 +301,26 @@ Technical details warrant claims only when an observer is meant to rely on them.
 | Error wording | Automation parses an exact message, or required user-facing text must match exactly. | The wording is editable diagnostic copy. |
 | Serialized field order | Order defines a signature, canonical representation, or byte protocol. | Consumers treat fields as unordered and current order is incidental. |
 | Performance threshold | A defined service level is promised and can be tested under defined conditions. | A benchmark records an exploratory goal or environment-sensitive comparison. |
-| Log event | Another system consumes a documented event schema and condition. | Maintainers read free-form diagnostic text. |
+| Log event | Another system consumes a documented event schema and condition. | Nothing consumes the free-form diagnostic text through a supported interface. |
 | API or protocol token | Callers rely on a documented status, header, field, event, or sentinel. | The token names a private helper, exception, or event with no supported observer. |
 
 ## Existing systems and changes
 
 ### Current behavior is evidence, not intent
 
-If implementation and tests both alphabetize serialized fields but no requirement establishes the order, the behavior remains unresolved. A maintainer decides whether to preserve, change, or remove it before a claim is written.
+If implementation and tests both alphabetize serialized fields but no requirement establishes the order, the behavior remains unresolved. Don't write a claim until it's clear whether the order must be preserved.
 
 ### A bug report does not define the correction
 
-“The old search result replaced the new one” identifies an observed failure. Maintainers must still decide whether older work is blocked as soon as newer work starts or only after newer work completes. Each decision produces a different scenario.
+“The old search result replaced the new one” describes what went wrong, but not the intended correction. Decide whether older work should be blocked as soon as newer work starts or only after newer work completes. Each choice produces a different scenario.
 
 ### A refactor does not create a claim
 
 Replacing linear search with an index creates no claim when results and every promised ordering rule remain unchanged. Existing claims remain in force; proofs may change only to observe the same behavior through the new implementation.
 
-### New semantics require a claim first
+### New intended behavior requires a claim first
 
-If maintainers add a promise that cancelled work can never publish, that accepted behavior is evaluated independently, written as a claim, proved, and then implemented.
+If cancelled work must never publish, evaluate that accepted behavior independently, write it as a claim, prove it, and then implement it.
 
 ## Complete decision sequence
 
@@ -320,12 +328,12 @@ For each candidate behavior:
 
 1. Name the narrowest subject to which the complete behavior applies.
 2. Identify the observer and supported observation boundary.
-3. Determine whether a maintainer has accepted the behavior as intended semantics.
+3. Verify that the behavior is intended.
 4. Determine whether changing it would meaningfully change an outcome the observer may rely on.
 5. Remove private implementation and unsupported interface details from the statement.
 6. Confirm that an executable proof can distinguish satisfaction from violation at the same boundary.
 7. Check that no existing claim specifies the same outcome under the same conditions.
-8. Classify the claim as an invariant or scenario according to whether relative event order is semantic.
+8. Classify the claim as an invariant or scenario according to whether relative event order changes the required outcome.
 9. Place it locally when one subject has the complete behavior; use `--` only when the interaction among several subjects is itself the subject.
 10. Split claims by independently meaningful behavior and proof cases by the evidence needed to establish each claim.
 

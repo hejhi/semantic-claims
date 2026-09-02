@@ -42,9 +42,9 @@ Each claim has one or more matching executable tests. Additional tests may prove
 
 ## §4 Validation results
 
-### §4.1 Failure output includes every detected semantic mismatch
+### §4.1 Failure output includes every detected structural mismatch
 
-A failed check reports every discovered mismatch with the affected file and enough semantic context to locate the violated pairing rule.
+A failed check reports every discovered structural mismatch with the affected file and enough claim or proof context to locate the violated pairing rule.
 
 ### §4.2 Success output includes the number of checked pairs
 
@@ -52,4 +52,4 @@ A successful check reports how many named claim-document-and-proof pairs were va
 
 ### §4.3 The checker process succeeds only when selected validation passes
 
-The checker process exits with status `0` when every selected validation passes and with a nonzero status when validation finds a semantic mismatch or the invocation is unsupported.
+The checker process exits with status `0` when every selected validation passes and with a nonzero status when validation finds a structural mismatch or the invocation is unsupported.

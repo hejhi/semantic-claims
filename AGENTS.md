@@ -9,11 +9,9 @@ Before changing the model or tooling, read:
 1. [README.md](./README.md)
 2. [OVERVIEW.md](./OVERVIEW.md)
 3. [FAQ.md](./FAQ.md)
-4. [SEMANTICS.md](./SEMANTICS.md)
-5. [CLAIMS.md](./CLAIMS.md)
-6. [EXAMPLES.md](./EXAMPLES.md)
-7. [EXISTING-SYSTEMS.md](./EXISTING-SYSTEMS.md)
-8. [JAVASCRIPT.md](./JAVASCRIPT.md)
+4. [REFERENCE.md](./REFERENCE.md)
+5. [EXAMPLES.md](./EXAMPLES.md)
+6. [JAVASCRIPT.md](./JAVASCRIPT.md)
 
 Use the [`semantic-claims`](./.agents/skills/semantic-claims) skill when creating, editing, auditing, or reviewing claims or claim documents, or when changing their checker.
 

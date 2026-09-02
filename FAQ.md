@@ -10,9 +10,9 @@ The workflow of Semantic Claims is already TDD-like:
 claim → failing proof → implementation
 ```
 
-The distinction is what comes before the test. TDD uses tests to specify behavior before implementation. With Semantic Claims, a plain-language description of what a part of the system should do comes first—much like acceptance criteria—followed by tests as executable proofs of that behavior. This plain-language step records the semantics independently of the test API and implementation.
+The distinction is what comes before the test. TDD uses tests to specify behavior before implementation. With Semantic Claims, a plain-language description of what a part of the system should do comes first—much like acceptance criteria—followed by tests as executable proofs of that behavior. This keeps the intended behavior independent of the test API and implementation.
 
-When semantics are added or changed, the claim precedes its proof and implementation.
+When intended behavior is added or changed, the claim precedes its proof and implementation.
 
 Additionally:
 
@@ -20,10 +20,10 @@ Additionally:
 - Ordinary tests do not all need claims.
 - A cross-cutting claim may specify behavior that belongs to an interaction rather than one local subject.
 
-The resulting workflow has an explicit semantic step before TDD:
+The resulting workflow has an explicit decision about intended behavior before TDD:
 
 ```text
-semantics → claim → test → implementation
+decide intended behavior → claim → proof → implementation
 ```
 
 A useful test is whether the claim would remain meaningful after replacing the test API and implementation. If so, it records information that the test alone may not preserve. If it merely paraphrases test code, implementation, or APIs, it is ceremony.
@@ -32,7 +32,7 @@ A useful test is whether the claim would remain meaningful after replacing the t
 
 Claims can serve as acceptance criteria, but the terms aren't perfectly interchangeable.
 
-The simplest distinction is that acceptance criteria define when a piece of work is acceptable. A Semantic Claim specifies a subject's semantics as observable behavior.
+The simplest distinction is that acceptance criteria define when a piece of work is acceptable. A Semantic Claim specifies part of a subject's intended observable behavior.
 
 Acceptance criteria are usually attached to a feature, issue, or change and describe its required outcomes. The same work item may also include:
 
@@ -41,13 +41,15 @@ Acceptance criteria are usually attached to a feature, issue, or change and desc
 - one-time migration conditions
 - manual verification steps
 
-A Semantic Claim belongs to a subject rather than a work item. It includes _only_ semantics that can be expressed as observable behavior and proven with tests. Its executable proofs remain after the original work is complete.
+A Semantic Claim belongs to a subject rather than a work item. It includes _only_ observable behavior that can be proven with tests. Its executable proofs remain after the original work is complete.
 
 For example:
 
-```text
-"When the modal closes, focus returns to the control that opened it."
-```
+> **Given** a modal was opened from a control,
+>
+> **When** the modal closes,
+>
+> **Then** focus returns to that control.
 
 This could be both an acceptance criterion for a modal feature and a Semantic Claim about modal focus behavior.
 
@@ -57,6 +59,6 @@ By contrast:
 "Implement the modal using the existing focus-trap library."
 ```
 
-That may be a valid implementation requirement for the work, but not a Semantic Claim because it prescribes implementation rather than semantics.
+That may be a valid implementation requirement for the work, but not a Semantic Claim because it prescribes implementation rather than observable behavior.
 
-Acceptance criteria can therefore provide candidate claims, but only the semantic portions become claims. The rest remain requirements of the particular work. Semantic Claims and acceptance criteria are complementary, but not interchangeable.
+Acceptance criteria can therefore provide candidate claims, but only the portions that specify warranted observable behavior become claims. The rest remain requirements of the particular work. Semantic Claims and acceptance criteria are complementary, but not interchangeable.

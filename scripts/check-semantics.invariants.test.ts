@@ -562,7 +562,7 @@ describe.each([1])('§1 — Repeated proof', () => {
 });
 
 describe('§4 — Validation results', () => {
-  test('§4.1 — Failure output includes every detected semantic mismatch', async () => {
+  test('§4.1 — Failure output includes every detected structural mismatch', async () => {
     const result = await runChecker({
       'missing-proof.invariants.md': `
 ## §1 Missing proof

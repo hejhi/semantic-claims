@@ -9,14 +9,13 @@ Use this skill when work requires deciding which observable behavior warrants a 
 
 Always read:
 
-- [SEMANTICS.md](references/SEMANTICS.md)
-- [CLAIMS.md](references/CLAIMS.md)
+- [README.md](references/README.md)
+- [REFERENCE.md](references/REFERENCE.md)
 
 Then read only what the work requires:
 
 - [FAQ.md](references/FAQ.md) for comparisons with TDD or acceptance criteria
 - [EXAMPLES.md](references/EXAMPLES.md) when the need for a claim or its kind is uncertain
-- [EXISTING-SYSTEMS.md](references/EXISTING-SYSTEMS.md) before applying the model to an existing or partly specified system
 - [JAVASCRIPT.md](references/JAVASCRIPT.md) before writing or validating a JavaScript or TypeScript proof
 
 ## Claim decision
@@ -33,9 +32,9 @@ Do not append this decision mechanically to routine updates or completion summar
 
 ## Who decides semantics
 
-The maintainer decides the subject's intended semantics. An agent may investigate evidence, identify ambiguity, and propose claims and proofs, but it does not decide what the subject is meant to do.
+The user decides what the subject is meant to do. An agent may investigate evidence, identify ambiguity, and propose claims and proofs, but it does not decide the intended behavior.
 
-Ask for confirmation only when proposing new semantics or changing existing semantics. Do not ask again when the maintainer has already specified or accepted the behavior. Audits, reviews, checker changes, proof repairs, and implementation work need no confirmation when existing claims remain unchanged.
+Ask for confirmation only when proposing new semantics or changing existing semantics. Do not ask again when the user has already specified or accepted the behavior. Audits, reviews, checker changes, proof repairs, and implementation work need no confirmation when existing claims remain unchanged.
 
 If you find that a claim may need to change, show the proposed change as a draft before editing the claim file.
 
@@ -43,8 +42,8 @@ Confirmation happens in the ordinary conversation.
 
 ## Workflow
 
-1. **Name and bound the subject.** Start from the change or concern identified by the maintainer. Inspect the affected subject's local claims and any applicable ancestor `--` claim documents. Read only the evidence needed to understand that scope.
-2. **Decide whether claims are warranted.** Express the subject's intended semantics as observable behavior and apply the claim criteria. A standing truth is an invariant; behavior whose meaning depends on event order is a scenario. If the behavior does not warrant a claim, add no claim and do not prescribe what the project should do instead.
+1. **Name and bound the subject.** Start from the change or concern identified by the user. Inspect the affected subject's local claims and any applicable ancestor `--` claim documents. Read only the evidence needed to understand that scope.
+2. **Decide whether claims are warranted.** Express the subject's intended semantics as observable behavior. A behavior needs a claim when changing or removing it would affect an intended outcome an observer relies on and no existing claim already covers it. A standing truth is an invariant; behavior whose meaning depends on event order is a scenario. If the behavior does not warrant a claim, add no claim and do not prescribe what the project should do instead.
 3. **Prepare one proposal.** Use the smallest non-overlapping claim set that specifies every warranted observable behavior found in the investigation. Include each subject, claim kind, wording, and proof obligation. For a cross-cutting claim, name the interaction itself as the subject.
 4. **Confirm proposed semantics.** When confirmation is needed, present the proposal before editing claim files and ask one natural question such as, “Does this look right?”
 5. **Follow claim → proof → implementation.** Write or revise the claim first. Then repeat its identifiers and titles in the proof structure before implementing the behavior.
@@ -52,11 +51,13 @@ Confirmation happens in the ordinary conversation.
 
 When the request already specifies or accepts the intended semantics, begin at the appropriate step without asking for confirmation again.
 
+Write invariants as direct statements. For scenarios, prefer Given/When/Then when it makes the starting conditions, events, and outcome easier to follow. Don't force an invariant into this form or add an empty step just to use all three words.
+
 Do not weaken or rewrite a claim merely to match its proof or implementation.
 
 ## Review
 
-Review the claim, proof, and implementation as one semantic change. Apply the claim criteria, the guidance for the relevant claim kind, and the project's proof-linking rules. Check that different claims do not repeat the same observable behavior.
+Review the claim, proof, and implementation as one semantic change. Check that every claim is warranted, follows the guidance for its kind, and uses the project's proof-linking rules. Check that different claims do not repeat the same observable behavior.
 
 ## Verify
 

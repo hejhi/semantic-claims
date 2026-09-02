@@ -77,15 +77,26 @@ async function readTree(
 }
 
 const sourceFiles = {
-  'SEMANTICS.md': 'source semantics\n',
-  'CLAIMS.md': 'source claims\n',
+  'README.md': [
+    'source [reference](./REFERENCE.md#claims)',
+    '[scripts](./scripts)',
+    '![explorer](./assets/explorer.png)',
+    '',
+  ].join('\n'),
+  'REFERENCE.md': 'source reference\n',
   'FAQ.md': 'source frequently asked questions\n',
   'EXAMPLES.md': 'source examples\n',
-  'EXISTING-SYSTEMS.md': 'source existing systems\n',
   'ELEPHANT-GOLDFISH.md': 'source elephant goldfish\n',
   'JAVASCRIPT.md': 'source javascript conventions\n',
   '.agents/skills/semantic-claims/SKILL.md': 'source skill\n',
 };
+
+const portableReadme = [
+  'source [reference](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#claims)',
+  '[scripts](https://github.com/hejhi/semantic-claims/tree/main/scripts)',
+  '![explorer](https://raw.githubusercontent.com/hejhi/semantic-claims/main/assets/explorer.png)',
+  '',
+].join('\n');
 
 describe('§1 — Generated method references', () => {
   test('§1.1 — Generated method references exactly match the configured source documents', async () => {
@@ -93,10 +104,14 @@ describe('§1 — Generated method references', () => {
       ...sourceFiles,
       '.agents/skills/semantic-claims/references/OBSOLETE.md':
         'obsolete reference\n',
-      '.agents/skills/semantic-claims/references/SEMANTICS.md':
-        'stale semantics\n',
       '.agents/skills/semantic-claims/references/CLAIMS.md':
         'stale claims\n',
+      '.agents/skills/semantic-claims/references/SEMANTICS.md':
+        'stale semantics\n',
+      '.agents/skills/semantic-claims/references/README.md':
+        'stale readme\n',
+      '.agents/skills/semantic-claims/references/REFERENCE.md':
+        'stale reference\n',
       '.agents/skills/semantic-claims/references/FAQ.md':
         'stale frequently asked questions\n',
       '.agents/skills/semantic-claims/references/EXAMPLES.md':
@@ -111,12 +126,10 @@ describe('§1 — Generated method references', () => {
 
     try {
       for (const document of [
-        'SEMANTICS.md',
-        'CLAIMS.md',
+        'README.md',
+        'REFERENCE.md',
         'FAQ.md',
         'EXAMPLES.md',
-        'EXISTING-SYSTEMS.md',
-        'ELEPHANT-GOLDFISH.md',
         'JAVASCRIPT.md',
       ]) {
         const source = await readFile(path.join(root, document), 'utf8');
@@ -128,7 +141,9 @@ describe('§1 — Generated method references', () => {
           ),
           'utf8',
         );
-        expect(generated).toBe(source);
+        expect(generated).toBe(
+          document === 'README.md' ? portableReadme : source,
+        );
       }
       expect(
         (
@@ -137,13 +152,11 @@ describe('§1 — Generated method references', () => {
           )
         ).sort(),
       ).toEqual([
-        'CLAIMS.md',
-        'ELEPHANT-GOLDFISH.md',
         'EXAMPLES.md',
-        'EXISTING-SYSTEMS.md',
         'FAQ.md',
         'JAVASCRIPT.md',
-        'SEMANTICS.md',
+        'README.md',
+        'REFERENCE.md',
       ]);
     } finally {
       await rm(root, { force: true, recursive: true });

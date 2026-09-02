@@ -1,6 +1,6 @@
 # JavaScript and TypeScript Conventions
 
-These conventions define how the `semantic-claims` checker links Markdown claim documents to JavaScript and TypeScript proof files. They supplement the [Semantic Claims Model](./SEMANTICS.md); they do not determine which observable behavior warrants a claim or whether a proof adequately tests that behavior.
+These conventions define how the `semantic-claims` checker links Markdown claim documents to JavaScript and TypeScript proof files. They supplement the model's [detailed reference](./REFERENCE.md); they do not determine which observable behavior warrants a claim or whether a proof adequately tests that behavior.
 
 The checker validates structural links. The project's test runner executes the proofs.
 
@@ -26,7 +26,7 @@ These conventions apply to ESM JavaScript and TypeScript projects. Supported pro
 
 ## Claim document structure
 
-A claim document follows the format defined in [CLAIMS.md](./CLAIMS.md#document-structure), including a subject heading and a statement for every claim.
+A claim document follows the format defined in the [reference](./REFERENCE.md#document-structure), including a subject heading and a statement for every claim.
 
 For structural validation, the checker recognizes section and claim headings outside fenced code blocks:
 

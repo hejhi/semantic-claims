@@ -1,6 +1,6 @@
 # Local Explorer Service Invariants
 
-The local explorer service provides a read-only browser interface for claims and proofs on the maintainer's machine.
+The local explorer service provides a read-only browser interface for claims and proofs.
 
 ## §1 Local read-only operation
 
