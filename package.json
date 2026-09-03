@@ -1,6 +1,6 @@
 {
   "name": "semantic-claims",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Validate and explore Semantic Claim documents and their executable proofs.",
   "license": "MIT",
   "author": "Henry Ivry",
