@@ -1,52 +1,60 @@
 # Overview
 
-With the Semantic Claims Model, people and coding agents specify observable software behavior in plain language and prove it with tests. Claims and proofs become shared context for later implementation, maintenance, and review.
-
-See the [README](./README.md) for run-through and a simple example.
+See the [README](./README.md) for a run-through and a simple example.
 
 ## Motivation
 
-Long before coding agents, people recorded important software intent across code, comments, tests, requirements, design documents, issue history, and memory. Whether you're transferring context, writing a brain dump, or front-loading a fresh agent chat, you have to bring that context together before you can confidently change existing behavior. When little of it was preserved—or when the surviving sources are stale or subtly conflict—recovering the original intent becomes much harder.
+Long before coding agents, people recorded important software intent across code, comments, tests, requirements, design documents, issue history, PRs, and memory. But that's important stuff—and recovering original intent of some given behavior or code from disparate sources is a painstaking and imprecise process.
 
 We've all been there:
 
-- "Wait. Didn't this used to work? I swear this was in the original requirements."
-- "Don't touch that code without first talking to X."
-- "What in God's name is this and why would anyone do it like this."
+- _"Wait. Didn't this used to work? I swear this was in the original requirements."_
+- _"Don't touch that code without first talking to X."_
+- _"What in God's name is this and why would anyone do it like this."_
 
-Coding agents compound this problem, making it more visible and immediate. An agent can produce a convincing change quickly while relying on many small incorrect assumptions or incomplete context; tests are only as good as the writer's understanding; engineers, designers, and product managers can each hold only so much context at once. Massive prose specs and design documents take up-front context, need to be maintained if they're to remain the source of truth, and when they intersect in functionality, there's a lot of room for subtle discrepencies and ambiguity.
+Coding agents compound this problem, churning out massive amounts of code, tests, and functionality rapidly. Specs quickly become stale and require a lot of discipline to maintain if they're to be the source of truth. They also tend to be overly verbose and lengthy, which takes up valuable context during an iteration if an agent needs to front-load it before beginning.
 
-Semantic Claims was designed to help with this by keeping essential intended behavior beside the code, with the perspective that what's good for humans is good for agents.
+Semantic Claims attempts to deal with this by creating a method to:
 
-Human engineers can use this model without coding agents. It's useful whenever a team needs to define behavior clearly or make changes to intended behavior easy to review. Making a meaningful change to observable behavior should cause a test to fail, prompting an analysis of the original claim to understand whether it's an intentional change or not. Separating claims from proofs means that updates to them require updates to both, **demanding intention and attention**.
+- break down a spec or design into **subjects** of meaningful behavior
+- create plain-language semantic contracts that specify that behavior as readable **claims**
+- create test files that observe and **prove** that behavior
+- colocate those artifacts with the subject's implementation
 
-## What this project provides
+The process:
 
-The current tooling in this repository is alpha and supports JavaScript and TypeScript.
+```
+claim -> prove -> implement
+```
 
-### Focused local context
+Human engineers can use this model even without coding agents. It's useful when a team needs to define behavior clearly or make changes to intended behavior easy to review. Making a meaningful change to observable behavior should cause a test to fail, and a review of the subject's semantic contract and proofs. Separating claims from proofs means that updates to them require updates to both, **demanding intention and attention**.
 
-A contributor can begin with the claims and proofs beside the subject, then read cross-cutting claims from shared directories when the work spans several subjects. This limits context gathering or up-front context stuffing without hiding relevant behavior.
+It also allows the semantic contract to be originally defined by other people, such as designers or product managers, leaving less ambiguity for implementation.
 
-### Clearer instructions for coding agents
 
-An agent receives plain-language behavior and executable expectations before implementation. It needs fewer assumptions about intent and can verify its work against an agreed result. Agents with higher intelligence with human oversight can author claims from technical designs, while delegating to agents with lower-intelligence to write proofs and implementations aligning with the claims.
+See [this blog post](https://dev.to/hejhi/semantic-claims-conveying-intent-and-verifiable-context-to-humans-and-agents-50lo) for the process of arriving at this model.
 
-### Visible changes to intended behavior
+## Goals
 
-In version tracking, updates to claims, proofs, and implementations for a change to intended behavior appear in one reviewable diff. Reviewers can spot a changed proof or implementation without a corresponding claim update and check whether the implementation still satisfies the claims.
+### Creating focused local context
 
-### Explicit purpose for important tests
+When a semantic contract is verified and next to an implementation, anyone exploring the domain can get an immediate understanding of meaningful, intended behavior. Cross-cutting claims sitting above it can also be inspected for greater system-level reasoning. These claims and proofs can be explored entirely separately from code to get a quick understanding of semantics, terminology, APIs, and behavior.
 
-Stable identifiers connect each claim to its proofs. A reader can see why a test exists and detect missing, stale, or unrelated proof coverage.
+### Clearer instructions
 
-### Shared vocabulary
+Claims and proofs around coherent subjects reduce ambiguity...for everyone. There's less to infer when fewer code paths need to be traced through for understanding.
 
-Claims use the ordinary language of their subject and require deciding intended behavior up front, before implementation. Planning, implementation, testing, and review can refer to the same behavior in the same terms.
+Agents with higher intelligence can also author claims from technical designs, while delegating to less intelligent agents for writing proofs and implementations.
 
-### Independence from a particular agent or language
+**Always remember: human guidance, oversight, and review is still a must!** 👍🌈🦄
 
-Claims are Markdown and proofs are ordinary tests. Different languages and test frameworks can use different file conventions while preserving the same claim-to-proof relationship.
+### Clearer diffs
+
+Changes to claims, proofs, and implementations appear brightly as a coherent unit.
+
+### Semantics-first
+
+Defining a subject and its semantic contract requires thinking about semantics before implementation, which provides a clarity downstream to proofs and implementation.
 
 ## Repository guide
 
@@ -54,6 +62,5 @@ Claims are Markdown and proofs are ordinary tests. Different languages and test 
 - [EXAMPLES.md](./EXAMPLES.md): claim-decision examples and borderline cases.
 - [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.
 - [FAQ.md](./FAQ.md): common questions about Semantic Claims, TDD, and acceptance criteria.
-- [ELEPHANT-GOLDFISH.md](./ELEPHANT-GOLDFISH.md): using Semantic Claims within the Elephant-Goldfish development process.
 - [`scripts/check-semantics.mjs`](./scripts/check-semantics.mjs) checks JavaScript and TypeScript claim-and-proof pairing.
 - [`.agents/skills/semantic-claims`](./.agents/skills/semantic-claims): instructions for coding agents.

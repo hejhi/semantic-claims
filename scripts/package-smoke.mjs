@@ -22,7 +22,6 @@ const EXPECTED_FILES = [
   '.agents/skills/semantic-claims/references/JAVASCRIPT.md',
   '.agents/skills/semantic-claims/references/README.md',
   '.agents/skills/semantic-claims/references/REFERENCE.md',
-  'ELEPHANT-GOLDFISH.md',
   'EXAMPLES.md',
   'FAQ.md',
   'JAVASCRIPT.md',

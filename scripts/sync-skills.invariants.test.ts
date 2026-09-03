@@ -86,7 +86,6 @@ const sourceFiles = {
   'REFERENCE.md': 'source reference\n',
   'FAQ.md': 'source frequently asked questions\n',
   'EXAMPLES.md': 'source examples\n',
-  'ELEPHANT-GOLDFISH.md': 'source elephant goldfish\n',
   'JAVASCRIPT.md': 'source javascript conventions\n',
   '.agents/skills/semantic-claims/SKILL.md': 'source skill\n',
 };
@@ -118,8 +117,6 @@ describe('§1 — Generated method references', () => {
         'stale examples\n',
       '.agents/skills/semantic-claims/references/EXISTING-SYSTEMS.md':
         'stale existing systems\n',
-      '.agents/skills/semantic-claims/references/ELEPHANT-GOLDFISH.md':
-        'stale elephant goldfish\n',
       '.agents/skills/semantic-claims/references/JAVASCRIPT.md':
         'stale javascript conventions\n',
     });
