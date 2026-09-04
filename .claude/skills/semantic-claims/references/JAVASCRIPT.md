@@ -1,8 +1,6 @@
 # JavaScript and TypeScript Conventions
 
-These conventions define how the `semantic-claims` checker links Markdown claim documents to JavaScript and TypeScript proof files. They supplement the model's [detailed reference](./REFERENCE.md); they do not determine which observable behavior warrants a claim or whether a proof adequately tests that behavior.
-
-The checker validates structural links. The project's test runner executes the proofs.
+These conventions define how the `semantic-claims` checker links Markdown claim documents to JavaScript and TypeScript proof files. They supplement the model's [detailed reference](./REFERENCE.md).
 
 ## File pairing
 

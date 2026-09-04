@@ -2,63 +2,14 @@
 
 ## Is the Semantic Claims Model the same as TDD?
 
-The influences behind the Semantic Claims Model include TDD, invariants in code design, and Gherkin-style acceptance criteria, but the model isn't the same as any one of them. However, Semantic Claims and TDD work well together.
+You _could_ argue Semantic Claims is a style of test driven development, but really the tests are driven by and linked to claims. They're also a bit more structured in how they're written, and serve a very specific purpose. The authoring flow is similar though, in that you author claims first, then write proof tests, then write implementation. I suppose it'd be called claim driven development though, if anything, as the proofs are really there specifically to enforce the semantic contract established by claims.
 
-The workflow of Semantic Claims is already TDD-like:
-
-```text
-claim → failing proof → implementation
-```
-
-The distinction is what comes before the test. TDD uses tests to specify behavior before implementation. With Semantic Claims, a plain-language description of what a part of the system should do comes first—much like acceptance criteria—followed by tests as executable proofs of that behavior. This keeps the intended behavior independent of the test API and implementation.
-
-When intended behavior is added or changed, the claim precedes its proof and implementation.
-
-Additionally:
-
-- One claim may require several proof cases.
-- Ordinary tests do not all need claims.
-- A cross-cutting claim may specify behavior that belongs to an interaction rather than one local subject.
-
-The resulting workflow has an explicit decision about intended behavior before TDD:
-
-```text
-decide intended behavior → claim → proof → implementation
-```
-
-A useful test is whether the claim would remain meaningful after replacing the test API and implementation. If so, it records information that the test alone may not preserve. If it merely paraphrases test code, implementation, or APIs, it is ceremony.
+Saying that, Semantic Claims doesn't seek to be a replacement for all tests; it serves a pretty narrow purpose. I think it's fair to say that Semantic Claims and TDD are complementary, though.
 
 ## Are claims just acceptance criteria?
 
-Claims can serve as acceptance criteria, but the terms aren't perfectly interchangeable.
+Claims can serve as acceptance criteria or be inferred or derived from them, but they're not interchangeable.
 
-The simplest distinction is that acceptance criteria define when a piece of work is acceptable. A Semantic Claim specifies part of a subject's intended observable behavior.
+Acceptance criteria is broader, while claims specify meaningful, observable behavior only. Acceptance criteria might include things like design or implementation constraints, delivery requirements, etc.
 
-Acceptance criteria are usually attached to a feature, issue, or change and describe its required outcomes. The same work item may also include:
-
-- design or implementation constraints
-- delivery requirements
-- one-time migration conditions
-- manual verification steps
-
-A Semantic Claim belongs to a subject rather than a work item. It includes _only_ observable behavior that can be proven with tests. Its executable proofs remain after the original work is complete.
-
-For example:
-
-> **Given** a modal was opened from a control,
->
-> **When** the modal closes,
->
-> **Then** focus returns to that control.
-
-This could be both an acceptance criterion for a modal feature and a Semantic Claim about modal focus behavior.
-
-By contrast:
-
-```text
-"Implement the modal using the existing focus-trap library."
-```
-
-That may be a valid implementation requirement for the work, but not a Semantic Claim because it prescribes implementation rather than observable behavior.
-
-Acceptance criteria can therefore provide candidate claims, but only the portions that specify warranted observable behavior become claims. The rest remain requirements of the particular work. Semantic Claims and acceptance criteria are complementary, but not interchangeable.
+So, like TDD, Semantic Claims and acceptance criteria are complementary, but not the same.

@@ -33,6 +33,7 @@ const EXPECTED_FILES = [
   'package.json',
   'scripts/check-semantics.mjs',
   'scripts/check-semantics/parse.mjs',
+  'scripts/check-semantics/repository.mjs',
   'scripts/check-semantics/typescript.mjs',
   'scripts/check-semantics/validate.mjs',
   'scripts/semantic-explorer/model.mjs',

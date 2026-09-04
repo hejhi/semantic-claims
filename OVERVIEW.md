@@ -14,23 +14,7 @@ We've all been there:
 
 Coding agents compound this problem, churning out massive amounts of code, tests, and functionality rapidly. Specs quickly become stale and require a lot of discipline to maintain if they're to be the source of truth. They also tend to be overly verbose and lengthy, which takes up valuable context during an iteration if an agent needs to front-load it before beginning.
 
-Semantic Claims attempts to deal with this by creating a method to:
-
-- break down a spec or design into **subjects** of meaningful behavior
-- create plain-language semantic contracts that specify that behavior as readable **claims**
-- create test files that observe and **prove** that behavior
-- colocate those artifacts with the subject's implementation
-
-The process:
-
-```
-claim -> prove -> implement
-```
-
-Human engineers can use this model even without coding agents. It's useful when a team needs to define behavior clearly or make changes to intended behavior easy to review. Making a meaningful change to observable behavior should cause a test to fail, and a review of the subject's semantic contract and proofs. Separating claims from proofs means that updates to them require updates to both, **demanding intention and attention**.
-
-It also allows the semantic contract to be originally defined by other people, such as designers or product managers, leaving less ambiguity for implementation.
-
+These issues motivated the development of Semantic Claims as a way to experiment with localizing and linking meaningful context to tests and implementation.
 
 See [this blog post](https://dev.to/hejhi/semantic-claims-conveying-intent-and-verifiable-context-to-humans-and-agents-50lo) for the process of arriving at this model.
 
@@ -38,7 +22,7 @@ See [this blog post](https://dev.to/hejhi/semantic-claims-conveying-intent-and-v
 
 ### Creating focused local context
 
-When a semantic contract is verified and next to an implementation, anyone exploring the domain can get an immediate understanding of meaningful, intended behavior. Cross-cutting claims sitting above it can also be inspected for greater system-level reasoning. These claims and proofs can be explored entirely separately from code to get a quick understanding of semantics, terminology, APIs, and behavior.
+When a semantic contract is linked to executable proofs and colocated with an implementation, anyone exploring the domain can quickly understand its meaningful, intended behavior. Cross-cutting claims sitting above it can also be inspected for greater system-level reasoning. These claims and proofs can be explored entirely separately from code to get a quick understanding of semantics, terminology, APIs, and behavior.
 
 ### Clearer instructions
 

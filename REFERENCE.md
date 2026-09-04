@@ -1,18 +1,30 @@
 # Semantic Claims Reference
 
-For a quick introduction, basic workflow, and complete example, start with the [README](./README.md).
+For a quick and accessible introduction, description, and example, start with the [README](./README.md).
+
+## Semantics
+
+Semantics are the intended observable behaviors of whatever is being built.
 
 ## Subjects
 
-A subject is a cohesive scope of meaningful software behavior that can be described, observed, and tested. There's no prescribed granularity; a subject might be a system, protocol, component, or tiny shared helper. Its name should remain valid despite implementation changes.
+A subject is a coherent semantic scope of any granularity, from a system or protocol to a component or small shared helper. The primary criterion is that it's semantically coherent and can be clearly named. Its name should reflect its semantics, and remain valid through implementation changes—or as long as its semantics don't change.
+
+Semantic Claims encourages breaking down implementation candidates (as in, something specified by designs, specs, requirements, etc) into such subjects. A good heuristic is to choose the narrowest clearly named scope that owns the complete observable behavior.
+
+For example, consider this requirement:
+
+> When two searches overlap, completing the older request must not replace the results for the newer search.
+
+The complete observable behavior concerns which results remain published, so **Search results** is the subject. **Search request** is too narrow because one request doesn't own the outcome, while **Search** is broader than the behavior requires.
 
 ## Claims
 
-A claim describes one meaningful, observable, testable behavior of a subject in plain language. Claims are grouped in claim sets, within a claim document, which as a whole forms a subject's semantic contract.
+A claim states one intended observable behavior of a subject's semantics in plain language. Claims are grouped in claim sets, within a claim document, which as a whole form a semantic contract.
 
-Claims should be written using terminology already established by the subject. They should include when the behavior applies, and what an observer can expect to happen.
+Claims should be written using familiar terminology already established within the scope of a subject. They should include when the behavior applies, and what an observer can expect to happen.
 
-Access to private implementation details does not by itself make them observable behavior.
+Note: Access to private implementation details does not by itself make a behavior observable, or intended!
 
 ### Claim kinds
 
@@ -21,13 +33,9 @@ Every claim is either an **invariant** or a **scenario**:
 - An invariant describes something that must be true whenever its stated conditions apply.
 - A scenario describes what must happen when events occur in a particular order.
 
-If changing the order of the relevant events could change the expected result, it's a scenario. Otherwise, it's an invariant.
+If changing the order of the relevant events could change the expected result, it's a scenario—the order of setup steps in a test doesn't make it one. The order has to matter to the behavior itself. Otherwise, it's an invariant.
 
-Invariants are direct statements. Scenarios are better structured as Given/When/Then when they make the starting conditions, events, and outcome easier to follow. However, they needn't be forced into it if it doesn't provide additional clarity over plain prose.
-
-The order of setup steps in a test doesn't make a claim a scenario. The order has to matter to the behavior itself.
-
-A subject may have invariant claims, scenario claims, or both.
+Invariants are written as direct statements. Scenarios can be structured as Given/When/Then to make the specification easier to follow, though it's not a requirement.
 
 Invariant and scenario claims should be separate documents. A subject can have both claim kinds:
 
@@ -53,7 +61,7 @@ The document is placed in the closest directory that contains files for every su
 
 ### Deciding whether a behavior needs a claim
 
-The first step is making sure the subject's behavior is clear, meaningful, and observable. A claim should be written when changing or removing the behavior would affect an intended outcome an observer relies on. If an existing claim already requires the same result under the same conditions, don't add another one.
+The first step is making sure the subject's behavior is clear, meaningful, and observable. A claim should be written when changing or removing the behavior would affect an intended outcome an observer relies on. If an existing claim already requires the same result under the same conditions, it doesn't need another one.
 
 ### Document structure
 
@@ -66,13 +74,13 @@ A claim document has a specific structure consisting of four parts:
 
 Each claim includes an identifier, title, and statement. The title should be short and declarative, with conditions and results in a statement beneath it.
 
-Only claims define required behavior. Introductions and claim-set headings provide context and organization. If a requirement matters on its own, it belongs in a claim.
+Introductions and claim-set headings provide context and organization only.
 
 Every section and claim identifier has to be unique within its document. The first number in a claim identifier refers to its section. For example, claim `§2.3` belongs to section `§2`.
 
-Identifiers provide stable links among claims, proofs, and references. The document's layout determines reading order. Identifiers don't set priority, execution order, or dependencies, so they may contain gaps or appear out of numeric order.
+Identifiers provide stable links among claims, proofs, and references—they don't correlate with priority, execution order, or dependencies, so it's fine for them to contain gaps or appear out of numeric order. Optimize for readability and clarity rather than ordering by numeric identifiers.
 
-A new claim should take any unused identifier in its section, and then be put where it reads naturally. If an identifier or title needs to change, every proof and reference that uses it should be updated too.
+This way, a new claim can take any unused identifier in its section, and then be put where it reads naturally. If an identifier or title needs to change, every proof and reference that uses it should be updated too so the link doesn't become stale.
 
 ## Proofs
 
@@ -82,13 +90,16 @@ For JavaScript and TypeScript, the filename and test structure conventions are d
 
 ## Resolving disagreements
 
-If the claim, proof, and implementation don't agree, it should first be determined what the software's supposed to do.
-
 If the intended behavior has changed, the claim should be updated first. If it hasn't, the claim should be left alone and the proof or implementation fixed.
 
-## Adding or changing behavior
+## Methodology
 
-For new work, the intended behavior may come from an accepted requirement, design, protocol, or explicit decision made during planning. The claim should be written before the proof and implementation.
+First, Semantic Claims begins after the intended behavior has been mapped, whether it's through requirements, specifications, or designs. Then:
+
+- identify subjects with coherent observable behavior
+- decide which behavior warrants claims and write each subject’s claim documents
+- create proof files that test claim semantics
+- write the implementation to pass the proof
 
 When adding or changing intended behavior:
 
