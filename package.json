@@ -46,13 +46,13 @@
     "check:semantics": "bun scripts/check-semantics.mjs",
     "check:invariants": "bun scripts/check-semantics.mjs invariants",
     "check:scenarios": "bun scripts/check-semantics.mjs scenarios",
+    "check:prerelease": "bun test && bun run test:package && git diff --check HEAD",
     "preview:explorer": "bun scripts/semantic-explorer/preview.mjs",
     "sync:skills": "bun scripts/sync-skills.mjs",
     "test": "bun test",
     "test:package:node22": "npm exec --yes --package=node@22 -- node scripts/package-smoke.mjs --expected-node=22",
     "test:package:node24": "npm exec --yes --package=node@24 -- node scripts/package-smoke.mjs --expected-node=24",
-    "test:package": "bun run test:package:node22 && bun run test:package:node24",
-    "check:prerelease": "bun sync:skills && bun test && bun test:package && git diff --check"
+    "test:package": "bun run test:package:node22 && bun run test:package:node24"
   },
   "dependencies": {
     "typescript": "7.0.2"
