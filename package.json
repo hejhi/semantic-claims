@@ -51,7 +51,8 @@
     "test": "bun test",
     "test:package:node22": "npm exec --yes --package=node@22 -- node scripts/package-smoke.mjs --expected-node=22",
     "test:package:node24": "npm exec --yes --package=node@24 -- node scripts/package-smoke.mjs --expected-node=24",
-    "test:package": "bun run test:package:node22 && bun run test:package:node24"
+    "test:package": "bun run test:package:node22 && bun run test:package:node24",
+    "check:prerelease": "bun sync:skills && bun test && bun test:package && git diff --check"
   },
   "dependencies": {
     "typescript": "7.0.2"
