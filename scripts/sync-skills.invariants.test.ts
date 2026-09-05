@@ -55,27 +55,6 @@ async function runSynchronizer(
   return { root, stderr, stdout };
 }
 
-async function readTree(
-  root: string,
-  directory = root,
-): Promise<Record<string, string>> {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const tree: Record<string, string> = {};
-
-  for (const entry of entries.sort((left, right) =>
-    left.name.localeCompare(right.name),
-  )) {
-    const fullPath = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      Object.assign(tree, await readTree(root, fullPath));
-    } else {
-      tree[path.relative(root, fullPath)] = await readFile(fullPath, 'utf8');
-    }
-  }
-
-  return tree;
-}
-
 const sourceFiles = {
   'README.md': [
     'source [reference](./REFERENCE.md#claims)',
@@ -155,43 +134,6 @@ describe('§1 — Generated method references', () => {
         'README.md',
         'REFERENCE.md',
       ]);
-    } finally {
-      await rm(root, { force: true, recursive: true });
-    }
-  });
-});
-
-describe('§2 — Runtime skill mirrors', () => {
-  test('§2.1 — Every runtime Semantic Claims skill exactly mirrors its source', async () => {
-    const { root } = await runSynchronizer({
-      ...sourceFiles,
-      '.agents/skills/semantic-claims/agents/openai.yaml': 'metadata\n',
-      '.agents/skills/another-skill/SKILL.md': 'source-only skill\n',
-      '.claude/skills/another-skill/SKILL.md': 'runtime skill\n',
-      '.claude/skills/runtime-only.txt': 'keep me\n',
-      '.claude/skills/semantic-claims/SKILL.md': 'stale skill\n',
-    });
-
-    try {
-      const source = await readTree(
-        path.join(root, '.agents/skills/semantic-claims'),
-      );
-      const runtime = await readTree(
-        path.join(root, '.claude/skills/semantic-claims'),
-      );
-      expect(runtime).toEqual(source);
-      expect(
-        await readFile(
-          path.join(root, '.claude/skills/another-skill/SKILL.md'),
-          'utf8',
-        ),
-      ).toBe('runtime skill\n');
-      expect(
-        await readFile(
-          path.join(root, '.claude/skills/runtime-only.txt'),
-          'utf8',
-        ),
-      ).toBe('keep me\n');
     } finally {
       await rm(root, { force: true, recursive: true });
     }

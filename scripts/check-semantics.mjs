@@ -10,7 +10,8 @@ const ROOT = process.cwd();
 function printUsage() {
   console.error(
     'Usage: semantic-claims [invariants] [scenarios]\n' +
-      '       semantic-claims explore',
+      '       semantic-claims explore\n' +
+      '       semantic-claims skill <install|update|remove> [directory]',
   );
 }
 
@@ -38,6 +39,19 @@ async function main() {
       };
       process.once('SIGINT', close);
       process.once('SIGTERM', close);
+    } catch (error) {
+      console.error(error.message);
+      process.exitCode = 1;
+    }
+    return;
+  }
+
+  if (arguments_[0] === 'skill') {
+    try {
+      const { runSkillManagement } = await import(
+        './skill-management.mjs'
+      );
+      console.log(await runSkillManagement(arguments_.slice(1), ROOT));
     } catch (error) {
       console.error(error.message);
       process.exitCode = 1;

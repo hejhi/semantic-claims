@@ -16,7 +16,6 @@ import { fileURLToPath } from 'node:url';
 
 const EXPECTED_FILES = [
   '.agents/skills/semantic-claims/SKILL.md',
-  '.agents/skills/semantic-claims/agents/openai.yaml',
   '.agents/skills/semantic-claims/references/EXAMPLES.md',
   '.agents/skills/semantic-claims/references/FAQ.md',
   '.agents/skills/semantic-claims/references/JAVASCRIPT.md',
@@ -36,6 +35,7 @@ const EXPECTED_FILES = [
   'scripts/check-semantics/repository.mjs',
   'scripts/check-semantics/typescript.mjs',
   'scripts/check-semantics/validate.mjs',
+  'scripts/skill-management.mjs',
   'scripts/semantic-explorer/model.mjs',
   'scripts/semantic-explorer/render.mjs',
   'scripts/semantic-explorer/server.mjs',
@@ -228,6 +228,11 @@ async function verifyInstalledManifest(packageRoot) {
     'Installed TypeScript dependency',
   );
   assertEqual(
+    manifest.dependencies?.yaml,
+    '^2.9.0',
+    'Installed YAML dependency',
+  );
+  assertEqual(
     manifest.repository,
     {
       type: 'git',
@@ -349,6 +354,85 @@ The matching static proof title provides structural coverage.
   );
 
   await writeFile(proofPath, validProof);
+}
+
+async function exerciseInstalledSkillManagement(
+  fixtureRoot,
+  installedPackageRoot,
+  environment,
+) {
+  const destination = path.join(fixtureRoot, 'agent-skills');
+  const target = path.join(destination, 'semantic-claims');
+  await mkdir(destination);
+
+  const installed = await runNpm(
+    [
+      'exec',
+      '--no',
+      '--',
+      'semantic-claims',
+      'skill',
+      'install',
+      destination,
+    ],
+    { cwd: fixtureRoot, env: environment },
+  );
+  requireSuccess(installed, 'Installed skill installation');
+  assertEqual(
+    await readFile(path.join(target, 'SKILL.md'), 'utf8'),
+    await readFile(
+      path.join(
+        installedPackageRoot,
+        '.agents',
+        'skills',
+        'semantic-claims',
+        'SKILL.md',
+      ),
+      'utf8',
+    ),
+    'Installed skill contents',
+  );
+
+  await writeFile(path.join(target, 'obsolete.txt'), 'obsolete\n');
+  const updated = await runNpm(
+    [
+      'exec',
+      '--no',
+      '--',
+      'semantic-claims',
+      'skill',
+      'update',
+      destination,
+    ],
+    { cwd: fixtureRoot, env: environment },
+  );
+  requireSuccess(updated, 'Installed skill update');
+  try {
+    await access(path.join(target, 'obsolete.txt'));
+    throw new Error('Installed skill update retained an obsolete file.');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+
+  const removed = await runNpm(
+    [
+      'exec',
+      '--no',
+      '--',
+      'semantic-claims',
+      'skill',
+      'remove',
+      destination,
+    ],
+    { cwd: fixtureRoot, env: environment },
+  );
+  requireSuccess(removed, 'Installed skill removal');
+  try {
+    await access(target);
+    throw new Error('Installed skill removal left the skill in place.');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
 }
 
 async function exerciseInstalledExplorer(
@@ -551,6 +635,11 @@ async function verifyPackage(expectedNode, temporaryRoot) {
   await verifyInstalledManifest(installedPackageRoot);
   await verifyMarkdownLinks(installedPackageRoot);
   await exerciseInstalledChecker(fixtureRoot, environment);
+  await exerciseInstalledSkillManagement(
+    fixtureRoot,
+    installedPackageRoot,
+    environment,
+  );
   await exerciseInstalledExplorer(
     fixtureRoot,
     installedPackageRoot,

@@ -1,4 +1,0 @@
-interface:
-  display_name: 'Semantic Claims'
-  short_description: 'Apply the Semantic Claims Model'
-  default_prompt: 'Use $semantic-claims to identify the subject, decide which intended semantics warrant invariant or scenario claims, confirm any agent-proposed semantic changes, and proceed in claim → proof → implementation order.'

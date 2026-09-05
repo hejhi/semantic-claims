@@ -163,18 +163,42 @@ The command checks the claim links, starts a read-only local server, and prints 
 
 ![Semantic Explorer showing claims grouped by subject](https://raw.githubusercontent.com/hejhi/semantic-claims/main/assets/semantic-explorer.png)
 
-### Add an agent skill
+### Install the agent skill
 
-This repository includes equivalent project-local skills for Codex and Claude Code. Copy the complete directory for the agent you use into the same path in your project:
+The Semantic Claims skill follows the open [Agent Skills specification](https://agentskills.io). Choose a skills directory supported by your agent, then install the skill there:
 
-- Codex: `.agents/skills/semantic-claims/`
-- Claude Code: `.claude/skills/semantic-claims/`
+```sh
+cd /path/to/skills
+npx semantic-claims@alpha skill install
+```
 
-The skill guides the agent through identifying subjects, investigating observable behavior, proposing claims and proofs, and implementing behavior you've accepted. Keeping the skill in the project makes its instructions versioned and visible in ordinary Git review.
+You can provide the skills directory instead of changing directories:
+
+```sh
+npx semantic-claims@alpha skill install /path/to/skills
+```
+
+The command installs the skill as `/path/to/skills/semantic-claims`. It does not detect or configure an agent.
+
+Run the corresponding command from the same directory, or pass that directory again, to update the skill to the version provided by the selected package release:
+
+```sh
+npx semantic-claims@alpha skill update
+npx semantic-claims@alpha skill update /path/to/skills
+```
+
+Remove the skill in the same way:
+
+```sh
+npx semantic-claims@alpha skill remove
+npx semantic-claims@alpha skill remove /path/to/skills
+```
+
+Installation refuses to replace an existing `semantic-claims` entry. Update and removal accept only an entry whose `SKILL.md` identifies it as the Semantic Claims skill, and leave neighboring skills alone.
 
 ### Remove it
 
-Uninstall the package, remove its package scripts, and delete the copied skill if present (no claims or proofs will be harmed in the process):
+Uninstall the checker package and remove its package scripts if present (no claims or proofs will be harmed in the process):
 
 ```sh
 npm uninstall semantic-claims

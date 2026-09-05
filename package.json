@@ -30,6 +30,7 @@
     "scripts/check-semantics/repository.mjs",
     "scripts/check-semantics/typescript.mjs",
     "scripts/check-semantics/validate.mjs",
+    "scripts/skill-management.mjs",
     "scripts/semantic-explorer/model.mjs",
     "scripts/semantic-explorer/render.mjs",
     "scripts/semantic-explorer/server.mjs"
@@ -55,6 +56,7 @@
     "test:package": "bun run test:package:node22 && bun run test:package:node24"
   },
   "dependencies": {
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "yaml": "^2.9.0"
   }
 }

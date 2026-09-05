@@ -35,7 +35,7 @@ Do not infer a new claim from an existing implementation. First understand the s
 - Keep each claim document beside the code and tests it describes.
 - In JavaScript and TypeScript proof files, repeat every section and claim title exactly.
 - Treat the claim, proof, and implementation as one reviewable semantic change.
-- Run `bun run sync:skills` after changing the method documents or source skill so generated references and runtime copies stay current.
+- Run `bun run sync:skills` after changing the method documents so the skill's generated references stay current.
 - Preserve unrelated user work.
 
 ## Verification

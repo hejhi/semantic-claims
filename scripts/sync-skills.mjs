@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
-// Builds generated skill references, then mirrors the skill into each runtime.
+// Builds generated skill references from the method documents.
 import {
-  cp,
   copyFile,
   mkdir,
   readFile,
@@ -11,7 +10,6 @@ import {
 import path from 'node:path';
 
 const SOURCE = '.agents/skills/semantic-claims';
-const TARGETS = ['.claude/skills/semantic-claims'];
 const SEMANTIC_CLAIMS_DOCS = [
   'README.md',
   'REFERENCE.md',
@@ -57,10 +55,3 @@ for (const document of SEMANTIC_CLAIMS_DOCS) {
 console.log(
   `generated ${SEMANTIC_CLAIMS_DOCS.length} semantic-claims references`,
 );
-
-for (const target of TARGETS) {
-  await rm(target, { force: true, recursive: true });
-  await mkdir(path.dirname(target), { recursive: true });
-  await cp(SOURCE, target, { recursive: true });
-  console.log(`synced ${SOURCE} -> ${target}`);
-}
