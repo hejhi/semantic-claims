@@ -74,12 +74,12 @@ function isInside(parent, candidate) {
 function parseExpectedNode(arguments_) {
   assert(
     arguments_.length === 1,
-    'Usage: node scripts/package-smoke.mjs --expected-node=22|24',
+    'Usage: node scripts/package-smoke.mjs --expected-node=22',
   );
-  const match = /^--expected-node=(22|24)$/.exec(arguments_[0]);
+  const match = /^--expected-node=(22)$/.exec(arguments_[0]);
   assert(
     match,
-    'Usage: node scripts/package-smoke.mjs --expected-node=22|24',
+    'Usage: node scripts/package-smoke.mjs --expected-node=22',
   );
   return Number(match[1]);
 }
@@ -219,7 +219,7 @@ async function verifyInstalledManifest(packageRoot) {
   );
   assertEqual(
     manifest.engines?.node,
-    '^22.0.0 || ^24.0.0',
+    '>=22',
     'Installed package Node engines',
   );
   assertEqual(
@@ -430,6 +430,74 @@ async function exerciseInstalledSkillManagement(
   try {
     await access(target);
     throw new Error('Installed skill removal left the skill in place.');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+
+  const defaultDestination = path.join(fixtureRoot, '.agents', 'skills');
+  const defaultTarget = path.join(defaultDestination, 'semantic-claims');
+  const defaultInstalled = await runNpm(
+    [
+      'exec',
+      '--no',
+      '--',
+      'semantic-claims',
+      'skill',
+      'install',
+    ],
+    { cwd: fixtureRoot, env: environment },
+  );
+  requireSuccess(defaultInstalled, 'Installed default skill installation');
+  assertEqual(
+    await readFile(path.join(defaultTarget, 'SKILL.md'), 'utf8'),
+    await readFile(
+      path.join(
+        installedPackageRoot,
+        '.agents',
+        'skills',
+        'semantic-claims',
+        'SKILL.md',
+      ),
+      'utf8',
+    ),
+    'Installed default skill contents',
+  );
+
+  await writeFile(path.join(defaultTarget, 'obsolete.txt'), 'obsolete\n');
+  const defaultUpdated = await runNpm(
+    [
+      'exec',
+      '--no',
+      '--',
+      'semantic-claims',
+      'skill',
+      'update',
+    ],
+    { cwd: fixtureRoot, env: environment },
+  );
+  requireSuccess(defaultUpdated, 'Installed default skill update');
+  try {
+    await access(path.join(defaultTarget, 'obsolete.txt'));
+    throw new Error('Installed default skill update retained an obsolete file.');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+
+  const defaultRemoved = await runNpm(
+    [
+      'exec',
+      '--no',
+      '--',
+      'semantic-claims',
+      'skill',
+      'remove',
+    ],
+    { cwd: fixtureRoot, env: environment },
+  );
+  requireSuccess(defaultRemoved, 'Installed default skill removal');
+  try {
+    await access(defaultTarget);
+    throw new Error('Installed default skill removal left the skill in place.');
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }

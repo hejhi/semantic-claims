@@ -126,7 +126,7 @@ You can install the (alpha) checker as a dev dependency:
 npm install --save-dev semantic-claims@alpha
 ```
 
-It was tested with single-package ESM JS/TS projects running Node 22 or 24, though I've used it successfully in a pnpm monorepo as well, but ymmv.
+It supports Node 22 and newer. I've also used it successfully in a pnpm monorepo, but ymmv.
 
 Add commands for checking claims and opening the explorer:
 
@@ -165,22 +165,21 @@ The command checks the claim links, starts a read-only local server, and prints 
 
 ### Install the agent skill
 
-The Semantic Claims skill follows the open [Agent Skills specification](https://agentskills.io). Choose a skills directory supported by your agent, then install the skill there:
+The Semantic Claims skill follows the open [Agent Skills specification](https://agentskills.io). From a project root, install the skill into `.agents/skills`:
 
 ```sh
-cd /path/to/skills
 npx semantic-claims@alpha skill install
 ```
 
-You can provide the skills directory instead of changing directories:
+You can provide a different skills directory:
 
 ```sh
 npx semantic-claims@alpha skill install /path/to/skills
 ```
 
-The command installs the skill as `/path/to/skills/semantic-claims`. It does not detect or configure an agent.
+If not specified, it defaults to `.agents/skills/semantic-claims` for installations/updates/removals.
 
-Run the corresponding command from the same directory, or pass that directory again, to update the skill to the version provided by the selected package release:
+Run the corresponding command from the project root, or pass the same explicit directory, to update the skill to the version provided by the selected package release:
 
 ```sh
 npx semantic-claims@alpha skill update
@@ -194,7 +193,7 @@ npx semantic-claims@alpha skill remove
 npx semantic-claims@alpha skill remove /path/to/skills
 ```
 
-Installation refuses to replace an existing `semantic-claims` entry. Update and removal accept only an entry whose `SKILL.md` identifies it as the Semantic Claims skill, and leave neighboring skills alone.
+Installation refuses to replace an existing `semantic-claims` entry.
 
 ### Remove it
 

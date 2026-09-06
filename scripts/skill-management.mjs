@@ -119,7 +119,7 @@ export async function runSkillManagement(arguments_, cwd = process.cwd()) {
     );
   }
 
-  const destination = path.resolve(cwd, directory ?? '.');
+  const destination = path.resolve(cwd, directory ?? '.agents/skills');
   const target = path.join(destination, SKILL_NAME);
 
   if (operation === 'install') {

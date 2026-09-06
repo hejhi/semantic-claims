@@ -72,13 +72,20 @@ describe('§1 — Destination', () => {
       expect(implicit.exitCode).toBe(0);
       expect(
         await readTree(
-          path.join(workingDirectory, 'semantic-claims'),
+          path.join(
+            workingDirectory,
+            '.agents',
+            'skills',
+            'semantic-claims',
+          ),
         ),
       ).toEqual(await readTree(SOURCE_SKILL));
 
       await writeFile(
         path.join(
           workingDirectory,
+          '.agents',
+          'skills',
           'semantic-claims',
           'obsolete.txt',
         ),
@@ -92,7 +99,12 @@ describe('§1 — Destination', () => {
       expect(implicitUpdate.exitCode).toBe(0);
       expect(
         await readTree(
-          path.join(workingDirectory, 'semantic-claims'),
+          path.join(
+            workingDirectory,
+            '.agents',
+            'skills',
+            'semantic-claims',
+          ),
         ),
       ).toEqual(await readTree(SOURCE_SKILL));
 
@@ -102,7 +114,9 @@ describe('§1 — Destination', () => {
         'remove',
       );
       expect(implicitRemoval.exitCode).toBe(0);
-      expect(await readdir(workingDirectory)).toEqual([]);
+      expect(
+        await readdir(path.join(workingDirectory, '.agents', 'skills')),
+      ).toEqual([]);
 
       const explicit = await runCommand(
         workingDirectory,

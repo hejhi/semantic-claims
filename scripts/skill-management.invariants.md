@@ -6,4 +6,4 @@ Agent skill management installs the packaged Semantic Claims skill into a direct
 
 ### §1.1 Commands manage the skill beneath the selected directory
 
-Each command manages the `semantic-claims` child of its selected directory. An explicit directory selects that destination, while an omitted directory selects the command's working directory.
+Each command manages the `semantic-claims` child of its selected directory. An explicit directory selects that destination, while an omitted directory selects the command's `.agents/skills` directory.
