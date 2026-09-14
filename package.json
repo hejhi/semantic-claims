@@ -18,7 +18,10 @@
     "semantic-claims": "scripts/check-semantics.mjs"
   },
   "files": [
-    ".agents/skills/semantic-claims",
+    ".agents/skills/semantic-claims-claim",
+    ".agents/skills/semantic-claims-prove",
+    ".agents/skills/semantic-claims-implement",
+    ".agents/skills/semantic-claims-review",
     "EXAMPLES.md",
     "FAQ.md",
     "JAVASCRIPT.md",

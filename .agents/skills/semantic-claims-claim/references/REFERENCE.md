@@ -2,7 +2,7 @@
 
 For a quick and accessible introduction, description, and example, start with the [README](./README.md).
 
-The method requires stating intended observable behavior before writing its proofs and implementation, linking each claim to executable tests, and reviewing the three together. The Markdown headings and filenames below are conventions for recording and locating those artifacts. The supplied checker requires this document format and the [JavaScript and TypeScript proof conventions](./JAVASCRIPT.md).
+The method requires stating intended observable behavior before writing proofs and implementation, linking each claim to executable tests, and reviewing the three together. The Markdown headings and filenames below are conventions for recording and locating those artifacts. The supplied checker requires this document format and the [JavaScript and TypeScript proof conventions](./JAVASCRIPT.md).
 
 ## Semantics
 
@@ -10,7 +10,7 @@ Semantics are the intended observable behaviors of whatever is being built.
 
 ## Subjects
 
-A subject is a named scope of intended observable behavior, from a system or protocol to a component or shared helper. Choose a scope that includes the complete observable outcome and can be clearly named. Its name should remain valid through implementation changes as long as the intended behavior stays the same.
+A subject represents a coherent and complete set of intentional observable behavior—from a system or protocol to a component or shared helper. A subject name should remain valid through implementation changes as long as the intended behavior stays the same.
 
 For example, consider this requirement:
 
@@ -23,8 +23,6 @@ The complete observable outcome is which results remain published, so **Search r
 A claim states one intended observable behavior of a subject's semantics in plain language. Claims are grouped in claim sets, within a claim document, which as a whole form a semantic contract.
 
 Claims should be written using familiar terminology already established within the scope of a subject. They should include when the behavior applies, and what an observer can expect to happen.
-
-Claims should never include implementation details or API shapes, and should always be written as simply as possible without sacrificing on precision. They are first-and-foremost written for humans to read and reason about.
 
 Note: Access to private implementation details does not by itself make a behavior observable, or intended!
 
@@ -88,7 +86,7 @@ This way, a new claim can take any unused identifier in its section, and then be
 
 ## Proofs
 
-Each claim document pairs with one proof file in the same directory, regardless of language. Every claim is verified by one or more executable tests in that file that form the claim’s proof. Each test must link unambiguously to the claim, though languages and test frameworks may represent that link differently.
+Each claim document pairs with one proof file in the same directory. Every claim is verified by one or more executable tests in that file that form the claim’s proof. Each test must link unambiguously to the claim, though languages and test frameworks may represent that link differently.
 
 For JavaScript and TypeScript, the filename and test structure conventions are detailed in [JAVASCRIPT.md](./JAVASCRIPT.md). This repo's checker validates the links, while project test runners are responsible for executing proofs.
 

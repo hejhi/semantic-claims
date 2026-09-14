@@ -14,13 +14,23 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const SKILL_NAMES = [
+  'semantic-claims-claim',
+  'semantic-claims-prove',
+  'semantic-claims-implement',
+  'semantic-claims-review',
+];
+const SKILL_FILES = [
+  ...SKILL_NAMES.map((name) => `.agents/skills/${name}/SKILL.md`),
+  '.agents/skills/semantic-claims-claim/GUIDE.md',
+  '.agents/skills/semantic-claims-claim/references/EXAMPLES.md',
+  '.agents/skills/semantic-claims-claim/references/FAQ.md',
+  '.agents/skills/semantic-claims-claim/references/JAVASCRIPT.md',
+  '.agents/skills/semantic-claims-claim/references/README.md',
+  '.agents/skills/semantic-claims-claim/references/REFERENCE.md',
+];
 const EXPECTED_FILES = [
-  '.agents/skills/semantic-claims/SKILL.md',
-  '.agents/skills/semantic-claims/references/EXAMPLES.md',
-  '.agents/skills/semantic-claims/references/FAQ.md',
-  '.agents/skills/semantic-claims/references/JAVASCRIPT.md',
-  '.agents/skills/semantic-claims/references/README.md',
-  '.agents/skills/semantic-claims/references/REFERENCE.md',
+  ...SKILL_FILES,
   'EXAMPLES.md',
   'FAQ.md',
   'JAVASCRIPT.md',
@@ -149,12 +159,10 @@ function requireSuccess(result, operation) {
   );
 }
 
-async function verifyMarkdownLinks(packageRoot) {
+async function verifyMarkdownLinks(packageRoot, documents = EXPECTED_FILES.filter((file) => file.endsWith('.md'))) {
   const linkPattern = /!?\[[^\]]*\]\(([^)]+)\)/g;
 
-  for (const document of EXPECTED_FILES.filter((file) =>
-    file.endsWith('.md'),
-  )) {
+  for (const document of documents) {
     const documentPath = path.join(packageRoot, document);
     const markdown = await readFile(documentPath, 'utf8');
 
@@ -361,145 +369,66 @@ async function exerciseInstalledSkillManagement(
   installedPackageRoot,
   environment,
 ) {
-  const destination = path.join(fixtureRoot, 'agent-skills');
-  const target = path.join(destination, 'semantic-claims');
-  await mkdir(destination);
+  for (const directory of ['agent-skills', null]) {
+    const destination = path.join(fixtureRoot, directory ?? '.agents/skills');
+    const directoryArguments = directory === null ? [] : [destination];
+    const run = (operation) => runNpm(
+      ['exec', '--no', '--', 'semantic-claims', 'skill', operation, ...directoryArguments],
+      { cwd: fixtureRoot, env: environment },
+    );
 
-  const installed = await runNpm(
-    [
-      'exec',
-      '--no',
-      '--',
-      'semantic-claims',
-      'skill',
-      'install',
-      destination,
-    ],
-    { cwd: fixtureRoot, env: environment },
-  );
-  requireSuccess(installed, 'Installed skill installation');
-  assertEqual(
-    await readFile(path.join(target, 'SKILL.md'), 'utf8'),
-    await readFile(
-      path.join(
-        installedPackageRoot,
-        '.agents',
-        'skills',
-        'semantic-claims',
-        'SKILL.md',
-      ),
-      'utf8',
-    ),
-    'Installed skill contents',
-  );
+    requireSuccess(await run('install'), 'Installed skills installation');
+    for (const file of SKILL_FILES) {
+      const relative = file.slice('.agents/skills/'.length);
+      assertEqual(
+        await readFile(path.join(destination, relative), 'utf8'),
+        await readFile(path.join(installedPackageRoot, file), 'utf8'),
+        `Installed ${relative}`,
+      );
+    }
+    await verifyMarkdownLinks(destination, SKILL_FILES.map((file) => file.slice('.agents/skills/'.length)));
 
-  await writeFile(path.join(target, 'obsolete.txt'), 'obsolete\n');
-  const updated = await runNpm(
-    [
-      'exec',
-      '--no',
-      '--',
-      'semantic-claims',
-      'skill',
-      'update',
-      destination,
-    ],
-    { cwd: fixtureRoot, env: environment },
-  );
-  requireSuccess(updated, 'Installed skill update');
-  try {
-    await access(path.join(target, 'obsolete.txt'));
-    throw new Error('Installed skill update retained an obsolete file.');
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
+    for (const name of SKILL_NAMES) {
+      await writeFile(path.join(destination, name, 'obsolete.txt'), 'obsolete\n');
+    }
+    requireSuccess(await run('update'), 'Installed skills update');
+    for (const name of SKILL_NAMES) {
+      try {
+        await access(path.join(destination, name, 'obsolete.txt'));
+        throw new Error(`Installed skills update retained an obsolete file in ${name}.`);
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error;
+      }
+    }
 
-  const removed = await runNpm(
-    [
-      'exec',
-      '--no',
-      '--',
-      'semantic-claims',
-      'skill',
-      'remove',
-      destination,
-    ],
-    { cwd: fixtureRoot, env: environment },
-  );
-  requireSuccess(removed, 'Installed skill removal');
-  try {
-    await access(target);
-    throw new Error('Installed skill removal left the skill in place.');
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
+    requireSuccess(await run('remove'), 'Installed skills removal');
+    for (const name of SKILL_NAMES) {
+      try {
+        await access(path.join(destination, name));
+        throw new Error(`Installed skills removal left ${name} in place.`);
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error;
+      }
+    }
 
-  const defaultDestination = path.join(fixtureRoot, '.agents', 'skills');
-  const defaultTarget = path.join(defaultDestination, 'semantic-claims');
-  const defaultInstalled = await runNpm(
-    [
-      'exec',
-      '--no',
-      '--',
-      'semantic-claims',
-      'skill',
-      'install',
-    ],
-    { cwd: fixtureRoot, env: environment },
-  );
-  requireSuccess(defaultInstalled, 'Installed default skill installation');
-  assertEqual(
-    await readFile(path.join(defaultTarget, 'SKILL.md'), 'utf8'),
-    await readFile(
-      path.join(
-        installedPackageRoot,
-        '.agents',
-        'skills',
-        'semantic-claims',
-        'SKILL.md',
-      ),
-      'utf8',
-    ),
-    'Installed default skill contents',
-  );
-
-  await writeFile(path.join(defaultTarget, 'obsolete.txt'), 'obsolete\n');
-  const defaultUpdated = await runNpm(
-    [
-      'exec',
-      '--no',
-      '--',
-      'semantic-claims',
-      'skill',
-      'update',
-    ],
-    { cwd: fixtureRoot, env: environment },
-  );
-  requireSuccess(defaultUpdated, 'Installed default skill update');
-  try {
-    await access(path.join(defaultTarget, 'obsolete.txt'));
-    throw new Error('Installed default skill update retained an obsolete file.');
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
-
-  const defaultRemoved = await runNpm(
-    [
-      'exec',
-      '--no',
-      '--',
-      'semantic-claims',
-      'skill',
-      'remove',
-    ],
-    { cwd: fixtureRoot, env: environment },
-  );
-  requireSuccess(defaultRemoved, 'Installed default skill removal');
-  try {
-    await access(defaultTarget);
-    throw new Error('Installed default skill removal left the skill in place.');
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
+    const legacy = path.join(destination, 'semantic-claims');
+    await mkdir(legacy);
+    await writeFile(path.join(legacy, 'SKILL.md'), '---\nname: semantic-claims\ndescription: Legacy skill\n---\n');
+    requireSuccess(await run('update'), 'Installed legacy skill migration');
+    for (const file of SKILL_FILES) {
+      assertEqual(
+        await readFile(path.join(destination, file.slice('.agents/skills/'.length)), 'utf8'),
+        await readFile(path.join(installedPackageRoot, file), 'utf8'),
+        `Migrated ${file}`,
+      );
+    }
+    try {
+      await access(legacy);
+      throw new Error('Legacy skill remained after migration.');
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    requireSuccess(await run('remove'), 'Migrated skills removal');
   }
 }
 

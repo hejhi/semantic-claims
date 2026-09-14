@@ -2,30 +2,30 @@
 
 ## §1 Installation
 
-### §1.1 Installation adds the packaged skill without replacing an existing entry
+### §1.1 Installation adds the packaged skills without replacing existing entries
 
-**Given** the selected directory has no `semantic-claims` entry,
+**Given** the selected directory has none of the four skill entries or the legacy `semantic-claims` entry,
 **When** installation runs,
-**Then** the directory receives an exact copy of the packaged skill.
+**Then** the directory receives exact copies of all four packaged skills, and other entries remain unchanged.
 
-If the entry already exists, installation fails and leaves it unchanged.
+If any of those entries already exists, installation fails without changing the selected directory.
 
 ## §2 Update
 
-### §2.1 Update replaces only an existing Semantic Claims skill
+### §2.1 Update replaces only recognized Semantic Claims skills
 
-**Given** the selected directory contains a Semantic Claims skill,
+**Given** the selected directory contains at least one of the four Semantic Claims skills or the legacy `semantic-claims` skill,
 **When** update runs,
-**Then** its contents exactly match the packaged skill and other entries in the selected directory remain unchanged.
+**Then** all four skills exactly match the packaged skills, any legacy skill is removed, and other entries in the selected directory remain unchanged.
 
-Update fails without changing the selected directory when its `semantic-claims` entry is absent or does not identify itself as the Semantic Claims skill.
+Update fails without changing the selected directory if none of the managed entries exists or any existing managed entry does not identify itself with its expected skill name.
 
 ## §3 Removal
 
-### §3.1 Removal deletes only an existing Semantic Claims skill
+### §3.1 Removal deletes only recognized Semantic Claims skills
 
-**Given** the selected directory contains a Semantic Claims skill,
+**Given** the selected directory contains at least one of the four Semantic Claims skills or the legacy `semantic-claims` skill,
 **When** removal runs,
-**Then** that skill is absent and other entries in the selected directory remain unchanged.
+**Then** those skills are absent and other entries in the selected directory remain unchanged.
 
-Removal fails without changing the selected directory when its `semantic-claims` entry is absent or does not identify itself as the Semantic Claims skill.
+Removal fails without changing the selected directory if none of the managed entries exists or any existing managed entry does not identify itself with its expected skill name.

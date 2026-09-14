@@ -14,8 +14,8 @@ import { fileURLToPath } from 'node:url';
 const CLI = fileURLToPath(
   new URL('./check-semantics.mjs', import.meta.url),
 );
-const SOURCE_SKILL = fileURLToPath(
-  new URL('../.agents/skills/semantic-claims', import.meta.url),
+const SOURCE_SKILLS = fileURLToPath(
+  new URL('../.agents/skills', import.meta.url),
 );
 
 async function runCommand(cwd: string, ...arguments_: string[]) {
@@ -54,82 +54,44 @@ async function readTree(
   return tree;
 }
 
-describe('§1 — Destination', () => {
-  test('§1.1 — Commands manage the skill beneath the selected directory', async () => {
-    const root = await mkdtemp(
-      path.join(tmpdir(), 'semantic-claims-skill-destination-'),
+const SKILL_NAMES = [
+  'semantic-claims-claim',
+  'semantic-claims-prove',
+  'semantic-claims-implement',
+  'semantic-claims-review',
+];
+
+async function expectPackagedSkills(destination: string) {
+  expect((await readdir(destination)).sort()).toEqual([...SKILL_NAMES].sort());
+  for (const name of SKILL_NAMES) {
+    expect(await readTree(path.join(destination, name))).toEqual(
+      await readTree(path.join(SOURCE_SKILLS, name)),
     );
+  }
+}
+
+describe('§1 — Destination', () => {
+  test('§1.1 — Commands manage the skills beneath the selected directory', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'semantic-claims-skill-destination-'));
     const workingDirectory = path.join(root, 'working');
     const selectedDirectory = path.join(root, 'selected');
+    const defaultDirectory = path.join(workingDirectory, '.agents', 'skills');
     await mkdir(workingDirectory);
 
     try {
-      const implicit = await runCommand(
-        workingDirectory,
-        'skill',
-        'install',
-      );
-      expect(implicit.exitCode).toBe(0);
-      expect(
-        await readTree(
-          path.join(
-            workingDirectory,
-            '.agents',
-            'skills',
-            'semantic-claims',
-          ),
-        ),
-      ).toEqual(await readTree(SOURCE_SKILL));
-
-      await writeFile(
-        path.join(
-          workingDirectory,
-          '.agents',
-          'skills',
-          'semantic-claims',
-          'obsolete.txt',
-        ),
-        'obsolete\n',
-      );
-      const implicitUpdate = await runCommand(
-        workingDirectory,
-        'skill',
-        'update',
-      );
-      expect(implicitUpdate.exitCode).toBe(0);
-      expect(
-        await readTree(
-          path.join(
-            workingDirectory,
-            '.agents',
-            'skills',
-            'semantic-claims',
-          ),
-        ),
-      ).toEqual(await readTree(SOURCE_SKILL));
-
-      const implicitRemoval = await runCommand(
-        workingDirectory,
-        'skill',
-        'remove',
-      );
-      expect(implicitRemoval.exitCode).toBe(0);
-      expect(
-        await readdir(path.join(workingDirectory, '.agents', 'skills')),
-      ).toEqual([]);
-
-      const explicit = await runCommand(
-        workingDirectory,
-        'skill',
-        'install',
-        selectedDirectory,
-      );
-      expect(explicit.exitCode).toBe(0);
-      expect(
-        await readTree(
-          path.join(selectedDirectory, 'semantic-claims'),
-        ),
-      ).toEqual(await readTree(SOURCE_SKILL));
+      for (const [destination, arguments_] of [
+        [defaultDirectory, []],
+        [selectedDirectory, [selectedDirectory]],
+        [selectedDirectory, ['../selected']],
+      ] as const) {
+        expect((await runCommand(workingDirectory, 'skill', 'install', ...arguments_)).exitCode).toBe(0);
+        await expectPackagedSkills(destination);
+        await writeFile(path.join(destination, SKILL_NAMES[0]!, 'obsolete.txt'), 'obsolete\n');
+        expect((await runCommand(workingDirectory, 'skill', 'update', ...arguments_)).exitCode).toBe(0);
+        await expectPackagedSkills(destination);
+        expect((await runCommand(workingDirectory, 'skill', 'remove', ...arguments_)).exitCode).toBe(0);
+        expect(await readdir(destination)).toEqual([]);
+      }
     } finally {
       await rm(root, { force: true, recursive: true });
     }

@@ -13,7 +13,7 @@ Read the documents relevant to the task:
 - [EXAMPLES.md](./EXAMPLES.md) for claim decisions and borderline cases
 - [JAVASCRIPT.md](./JAVASCRIPT.md) for JavaScript or TypeScript proof and checker changes
 
-Use the [`semantic-claims`](./.agents/skills/semantic-claims) skill when creating, editing, auditing, or reviewing claims or claim documents, or when changing their checker.
+Use the Semantic Claims skill appropriate to the task: [claim](./.agents/skills/semantic-claims-claim) for claim decisions and authoring, [prove](./.agents/skills/semantic-claims-prove) for proof tests, [implement](./.agents/skills/semantic-claims-implement) for implementation and checker changes, or [review](./.agents/skills/semantic-claims-review) for semantic reviews and checker failures.
 
 ## Core model
 

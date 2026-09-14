@@ -16,7 +16,7 @@ It's designed to help people, coding agents, and sentient creatures build and ma
 
 Semantic Claims is very similar to TDD (one could call it STDD, though not my _favorite_ acronym), with the difference being that the tests are driven by, and linked to, semantics.
 
-[**Semantics**](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#semantics) are the **intended observable behaviors** of whatever is being built. These behaviors are organized under named [**subjects**](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#subjects), then kick off a three-step workflow:
+[**Semantics**](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#semantics) are the **intended observable behaviors** of whatever is being built. These behaviors are organized under named [**subjects**](https://github.com/hejhi/semantic-claims/blob/main/REFERENCE.md#subjects), which represent a coherent and complete set of intended observable behaviors. They then pass through a three-step workflow:
 
 ```text
 claim  ->  prove  ->  implement
@@ -26,7 +26,7 @@ claim  ->  prove  ->  implement
 
 Breaking down the steps:
 
-1. **claim**: state an intended observable behavior
+1. **claim**: state the intended observable behavior
 2. **prove**: write tests that prove the implementation exhibits the claimed behavior
 3. **implement**: write or update the implementation until the proofs pass
 
@@ -114,7 +114,7 @@ The colocation and matching structure allow tools like the checker provided in t
 
 ## Tooling
 
-The repo also includes a [JS and TS claim checker and local Semantic Explorer](https://github.com/hejhi/semantic-claims/blob/main/scripts/check-semantics.mjs), plus [agent skills](https://github.com/hejhi/semantic-claims/tree/main/.agents/skills/semantic-claims) that can be used to help integrate the method into development workflows.
+The repo also includes a [JS and TS claim checker and local Semantic Explorer](https://github.com/hejhi/semantic-claims/blob/main/scripts/check-semantics.mjs), plus [agent skills](https://github.com/hejhi/semantic-claims/tree/main/.agents/skills) that can be used to help integrate the method into development workflows.
 
 Fun fact! Semantic Claims were used to build the [validation scripts](https://github.com/hejhi/semantic-claims/tree/main/scripts), if you want to see the model in action.
 
@@ -161,9 +161,20 @@ The command checks the claim links, starts a read-only local server, and prints 
 
 ![Semantic Explorer showing claims grouped by subject](https://raw.githubusercontent.com/hejhi/semantic-claims/main/assets/semantic-explorer.png)
 
-### Install the agent skill
+### Install the agent skills
 
-The Semantic Claims skill follows the open [Agent Skills specification](https://agentskills.io). From a project root, install the skill into `.agents/skills`:
+The four Semantic Claims skills follow the open [Agent Skills specification](https://agentskills.io). Select a skill in your agent's skill picker or mention it by name:
+
+| Skill | Purpose |
+| --- | --- |
+| `semantic-claims-claim` | Decide and author warranted claims. |
+| `semantic-claims-prove` | Write and run executable proofs for accepted claims. |
+| `semantic-claims-implement` | Implement the claimed behavior and verify it. |
+| `semantic-claims-review` | Review claims, proofs, and implementation together. |
+
+Each skill completes the requested stage. They share one copy of the method guidance and references, included with `semantic-claims-claim`.
+
+From a project root, install all four into `.agents/skills`:
 
 ```sh
 npx semantic-claims@alpha skill install
@@ -175,23 +186,23 @@ You can provide a different skills directory:
 npx semantic-claims@alpha skill install /path/to/skills
 ```
 
-If not specified, it defaults to `.agents/skills/semantic-claims` for installations/updates/removals.
+If no directory is specified, installation, update, and removal use `.agents/skills`. Each skill has its own named subdirectory.
 
-Run the corresponding command from the project root, or pass the same explicit directory, to update the skill to the version provided by the selected package release:
+Run the corresponding command from the project root, or pass the same explicit directory, to update all four skills to the version provided by the selected package release. Update also restores missing skills and migrates the previous single `semantic-claims` skill to the four new entries:
 
 ```sh
 npx semantic-claims@alpha skill update
 npx semantic-claims@alpha skill update /path/to/skills
 ```
 
-Remove the skill in the same way:
+Remove the skills in the same way:
 
 ```sh
 npx semantic-claims@alpha skill remove
 npx semantic-claims@alpha skill remove /path/to/skills
 ```
 
-Installation refuses to replace an existing `semantic-claims` entry.
+Installation refuses to replace any existing entry with one of the four skill names or the legacy `semantic-claims` name. Update and removal verify the identity of every affected entry before changing anything. Other skills are left unchanged.
 
 ### Remove it
 

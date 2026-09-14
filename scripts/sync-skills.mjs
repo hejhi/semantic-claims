@@ -9,7 +9,7 @@ import {
 } from 'node:fs/promises';
 import path from 'node:path';
 
-const SOURCE = '.agents/skills/semantic-claims';
+const SOURCE = '.agents/skills/semantic-claims-claim';
 const SEMANTIC_CLAIMS_DOCS = [
   'README.md',
   'REFERENCE.md',
@@ -20,7 +20,7 @@ const SEMANTIC_CLAIMS_DOCS = [
 const semanticClaimsReferences = path.join(SOURCE, 'references');
 const REPOSITORY_URL = 'https://github.com/hejhi/semantic-claims';
 const REPOSITORY_DIRECTORIES = new Set([
-  '.agents/skills/semantic-claims',
+  '.agents/skills',
   'scripts',
 ]);
 

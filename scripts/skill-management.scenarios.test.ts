@@ -14,8 +14,8 @@ import { fileURLToPath } from 'node:url';
 const CLI = fileURLToPath(
   new URL('./check-semantics.mjs', import.meta.url),
 );
-const SOURCE_SKILL = fileURLToPath(
-  new URL('../.agents/skills/semantic-claims', import.meta.url),
+const SOURCE_SKILLS = fileURLToPath(
+  new URL('../.agents/skills', import.meta.url),
 );
 
 async function runCommand(cwd: string, ...arguments_: string[]) {
@@ -54,16 +54,6 @@ async function readTree(
   return tree;
 }
 
-async function exists(filePath: string) {
-  try {
-    await readdir(filePath);
-    return true;
-  } catch (error) {
-    if (error.code === 'ENOENT') return false;
-    throw error;
-  }
-}
-
 async function createFixture() {
   const root = await mkdtemp(
     path.join(tmpdir(), 'semantic-claims-skill-management-'),
@@ -73,34 +63,53 @@ async function createFixture() {
   return { destination, root };
 }
 
+const SKILL_NAMES = [
+  'semantic-claims-claim',
+  'semantic-claims-prove',
+  'semantic-claims-implement',
+  'semantic-claims-review',
+];
+
+async function expectPackagedSkills(destination: string) {
+  for (const name of SKILL_NAMES) {
+    expect(await readTree(path.join(destination, name))).toEqual(
+      await readTree(path.join(SOURCE_SKILLS, name)),
+    );
+  }
+}
+
 describe('§1 — Installation', () => {
-  test('§1.1 — Installation adds the packaged skill without replacing an existing entry', async () => {
+  test('§1.1 — Installation adds the packaged skills without replacing existing entries', async () => {
     const { destination, root } = await createFixture();
-    const target = path.join(destination, 'semantic-claims');
-
     try {
-      const installed = await runCommand(
-        root,
-        'skill',
-        'install',
-        destination,
-      );
-      expect(installed.exitCode).toBe(0);
-      expect(await readTree(target)).toEqual(
-        await readTree(SOURCE_SKILL),
-      );
+      await writeFile(path.join(destination, 'unrelated.txt'), 'keep me\n');
+      expect((await runCommand(root, 'skill', 'install', destination)).exitCode).toBe(0);
+      await expectPackagedSkills(destination);
+      expect((await readdir(destination)).sort()).toEqual([...SKILL_NAMES, 'unrelated.txt'].sort());
+      expect(await readFile(path.join(destination, 'unrelated.txt'), 'utf8')).toBe('keep me\n');
 
-      await writeFile(path.join(target, 'local.txt'), 'keep me\n');
-      const before = await readTree(target);
-      const repeated = await runCommand(
-        root,
-        'skill',
-        'install',
-        destination,
-      );
+      await writeFile(path.join(destination, SKILL_NAMES[0]!, 'local.txt'), 'local edit\n');
+      const before = await readTree(destination);
+      const repeated = await runCommand(root, 'skill', 'install', destination);
       expect(repeated.exitCode).toBe(1);
       expect(repeated.stderr).toContain('already exists');
-      expect(await readTree(target)).toEqual(before);
+      expect(await readTree(destination)).toEqual(before);
+    } finally {
+      await rm(root, { force: true, recursive: true });
+    }
+  });
+
+  test('§1.1 — Installation adds the packaged skills without replacing existing entries', async () => {
+    const { destination, root } = await createFixture();
+    try {
+      for (const name of [...SKILL_NAMES, 'semantic-claims']) {
+        const target = path.join(destination, name);
+        await writeFile(target, 'unrelated entry\n');
+        const before = await readTree(destination);
+        expect((await runCommand(root, 'skill', 'install', destination)).exitCode).toBe(1);
+        expect(await readTree(destination)).toEqual(before);
+        await rm(target);
+      }
     } finally {
       await rm(root, { force: true, recursive: true });
     }
@@ -108,203 +117,97 @@ describe('§1 — Installation', () => {
 });
 
 describe('§2 — Update', () => {
-  test('§2.1 — Update replaces only an existing Semantic Claims skill', async () => {
+  test('§2.1 — Update replaces only recognized Semantic Claims skills', async () => {
     const { destination, root } = await createFixture();
-    const target = path.join(destination, 'semantic-claims');
-    const sibling = path.join(destination, 'another-skill');
-
     try {
-      expect(
-        (
-          await runCommand(
-            root,
-            'skill',
-            'install',
-            destination,
-          )
-        ).exitCode,
-      ).toBe(0);
-      await writeFile(path.join(target, 'obsolete.txt'), 'obsolete\n');
-      await mkdir(sibling);
-      await writeFile(path.join(sibling, 'SKILL.md'), 'sibling\n');
-
-      const updated = await runCommand(
-        root,
-        'skill',
-        'update',
-        destination,
-      );
-      expect(updated.exitCode).toBe(0);
-      expect(await readTree(target)).toEqual(
-        await readTree(SOURCE_SKILL),
-      );
-      expect(await readFile(path.join(sibling, 'SKILL.md'), 'utf8')).toBe(
-        'sibling\n',
-      );
+      expect((await runCommand(root, 'skill', 'install', destination)).exitCode).toBe(0);
+      for (const name of SKILL_NAMES) {
+        await writeFile(path.join(destination, name, 'obsolete.txt'), 'obsolete\n');
+      }
+      await rm(path.join(destination, 'semantic-claims-prove'), { recursive: true });
+      await writeFile(path.join(destination, 'unrelated.txt'), 'keep me\n');
+      expect((await runCommand(root, 'skill', 'update', destination)).exitCode).toBe(0);
+      await expectPackagedSkills(destination);
+      expect((await readdir(destination)).sort()).toEqual([...SKILL_NAMES, 'unrelated.txt'].sort());
+      expect(await readFile(path.join(destination, 'unrelated.txt'), 'utf8')).toBe('keep me\n');
     } finally {
       await rm(root, { force: true, recursive: true });
     }
   });
 
-  test('§2.1 — Update replaces only an existing Semantic Claims skill', async () => {
+  test('§2.1 — Update replaces only recognized Semantic Claims skills', async () => {
     const { destination, root } = await createFixture();
-    const target = path.join(destination, 'semantic-claims');
-
     try {
-      const absentBefore = await readTree(destination);
-      const absent = await runCommand(
-        root,
-        'skill',
-        'update',
-        destination,
-      );
-      expect(absent.exitCode).toBe(1);
-      expect(await readTree(destination)).toEqual(absentBefore);
-
-      await mkdir(target);
-      await writeFile(
-        path.join(target, 'SKILL.md'),
-        '---\nname: another-skill\n---\n',
-      );
-      const otherBefore = await readTree(destination);
-      const other = await runCommand(
-        root,
-        'skill',
-        'update',
-        destination,
-      );
-      expect(other.exitCode).toBe(1);
-      expect(await readTree(destination)).toEqual(otherBefore);
-
-      await writeFile(
-        path.join(target, 'SKILL.md'),
-        '---\nname: semantic-claims # local note\ndescription: Local copy\n---\n',
-      );
-      const commented = await runCommand(
-        root,
-        'skill',
-        'update',
-        destination,
-      );
-      expect(commented.exitCode).toBe(0);
-      expect(await readTree(target)).toEqual(
-        await readTree(SOURCE_SKILL),
-      );
-
-      await writeFile(
-        path.join(target, 'SKILL.md'),
-        '---\nname: semantic-claims\nname: another-skill\n---\n',
-      );
-      const duplicateBefore = await readTree(destination);
-      const duplicate = await runCommand(
-        root,
-        'skill',
-        'update',
-        destination,
-      );
-      expect(duplicate.exitCode).toBe(1);
-      expect(await readTree(destination)).toEqual(duplicateBefore);
+      const legacy = path.join(destination, 'semantic-claims');
+      await mkdir(legacy);
+      await writeFile(path.join(legacy, 'SKILL.md'), '---\nname: semantic-claims # local note\ndescription: Legacy skill\n---\n');
+      await writeFile(path.join(legacy, 'obsolete.txt'), 'obsolete\n');
+      expect((await runCommand(root, 'skill', 'update', destination)).exitCode).toBe(0);
+      await expectPackagedSkills(destination);
+      expect((await readdir(destination)).sort()).toEqual([...SKILL_NAMES].sort());
     } finally {
       await rm(root, { force: true, recursive: true });
     }
+  });
+
+  test('§2.1 — Update replaces only recognized Semantic Claims skills', async () => {
+    await expectRejectedChanges('update');
   });
 });
 
 describe('§3 — Removal', () => {
-  test('§3.1 — Removal deletes only an existing Semantic Claims skill', async () => {
+  test('§3.1 — Removal deletes only recognized Semantic Claims skills', async () => {
     const { destination, root } = await createFixture();
-    const target = path.join(destination, 'semantic-claims');
-    const sibling = path.join(destination, 'another-skill');
-
     try {
-      expect(
-        (
-          await runCommand(
-            root,
-            'skill',
-            'install',
-            destination,
-          )
-        ).exitCode,
-      ).toBe(0);
-      await mkdir(sibling);
-      await writeFile(path.join(sibling, 'SKILL.md'), 'sibling\n');
-
-      const removed = await runCommand(
-        root,
-        'skill',
-        'remove',
-        destination,
-      );
-      expect(removed.exitCode).toBe(0);
-      expect(await exists(target)).toBe(false);
-      expect(await readFile(path.join(sibling, 'SKILL.md'), 'utf8')).toBe(
-        'sibling\n',
-      );
+      expect((await runCommand(root, 'skill', 'install', destination)).exitCode).toBe(0);
+      await rm(path.join(destination, 'semantic-claims-claim'), { recursive: true });
+      const legacy = path.join(destination, 'semantic-claims');
+      await mkdir(legacy);
+      await writeFile(path.join(legacy, 'SKILL.md'), '---\nname: semantic-claims # local note\n---\n');
+      await writeFile(path.join(destination, 'unrelated.txt'), 'keep me\n');
+      expect((await runCommand(root, 'skill', 'remove', destination)).exitCode).toBe(0);
+      expect(await readTree(destination)).toEqual({ 'unrelated.txt': 'keep me\n' });
     } finally {
       await rm(root, { force: true, recursive: true });
     }
   });
 
-  test('§3.1 — Removal deletes only an existing Semantic Claims skill', async () => {
-    const { destination, root } = await createFixture();
-    const target = path.join(destination, 'semantic-claims');
-
-    try {
-      const absentBefore = await readTree(destination);
-      const absent = await runCommand(
-        root,
-        'skill',
-        'remove',
-        destination,
-      );
-      expect(absent.exitCode).toBe(1);
-      expect(await readTree(destination)).toEqual(absentBefore);
-
-      await mkdir(target);
-      await writeFile(
-        path.join(target, 'SKILL.md'),
-        '---\nname: another-skill\n---\n',
-      );
-      const otherBefore = await readTree(destination);
-      const other = await runCommand(
-        root,
-        'skill',
-        'remove',
-        destination,
-      );
-      expect(other.exitCode).toBe(1);
-      expect(await readTree(destination)).toEqual(otherBefore);
-
-      await writeFile(
-        path.join(target, 'SKILL.md'),
-        '---\nname: semantic-claims # local note\ndescription: Local copy\n---\n',
-      );
-      const commented = await runCommand(
-        root,
-        'skill',
-        'remove',
-        destination,
-      );
-      expect(commented.exitCode).toBe(0);
-      expect(await exists(target)).toBe(false);
-
-      await mkdir(target);
-      await writeFile(
-        path.join(target, 'SKILL.md'),
-        '---\nname: semantic-claims\nname: another-skill\n---\n',
-      );
-      const duplicateBefore = await readTree(destination);
-      const duplicate = await runCommand(
-        root,
-        'skill',
-        'remove',
-        destination,
-      );
-      expect(duplicate.exitCode).toBe(1);
-      expect(await readTree(destination)).toEqual(duplicateBefore);
-    } finally {
-      await rm(root, { force: true, recursive: true });
-    }
+  test('§3.1 — Removal deletes only recognized Semantic Claims skills', async () => {
+    await expectRejectedChanges('remove');
   });
 });
+
+async function expectRejectedChanges(operation: string) {
+  const { destination, root } = await createFixture();
+  try {
+    expect((await runCommand(root, 'skill', operation, destination)).exitCode).toBe(1);
+    expect(await readdir(destination)).toEqual([]);
+    expect((await runCommand(root, 'skill', 'install', destination)).exitCode).toBe(0);
+    for (const name of ['semantic-claims-review', 'semantic-claims']) {
+      const target = path.join(destination, name);
+      await rm(target, { recursive: true, force: true });
+      await writeFile(target, 'unrelated file\n');
+      let before = await readTree(destination);
+      expect((await runCommand(root, 'skill', operation, destination)).exitCode).toBe(1);
+      expect(await readTree(destination)).toEqual(before);
+      await rm(target);
+      await mkdir(target);
+      for (const content of [
+        '',
+        '---\nname: another-skill\n---\n',
+        `---\nname: ${name}\nname: another-skill\n---\n`,
+        '---\nname: [invalid\n---\n',
+      ]) {
+        await writeFile(path.join(target, 'SKILL.md'), content);
+        before = await readTree(destination);
+        expect((await runCommand(root, 'skill', operation, destination)).exitCode).toBe(1);
+        expect(await readTree(destination)).toEqual(before);
+      }
+      if (name === 'semantic-claims-review') {
+        await writeFile(path.join(target, 'SKILL.md'), `---\nname: ${name} # local note\n---\n`);
+      }
+    }
+  } finally {
+    await rm(root, { force: true, recursive: true });
+  }
+}

@@ -66,7 +66,7 @@ const sourceFiles = {
   'FAQ.md': 'source frequently asked questions\n',
   'EXAMPLES.md': 'source examples\n',
   'JAVASCRIPT.md': 'source javascript conventions\n',
-  '.agents/skills/semantic-claims/SKILL.md': 'source skill\n',
+  '.agents/skills/semantic-claims-claim/SKILL.md': 'source skill\n',
 };
 
 const portableReadme = [
@@ -80,23 +80,23 @@ describe('§1 — Generated method references', () => {
   test('§1.1 — Generated method references exactly match the configured source documents', async () => {
     const { root } = await runSynchronizer({
       ...sourceFiles,
-      '.agents/skills/semantic-claims/references/OBSOLETE.md':
+      '.agents/skills/semantic-claims-claim/references/OBSOLETE.md':
         'obsolete reference\n',
-      '.agents/skills/semantic-claims/references/CLAIMS.md':
+      '.agents/skills/semantic-claims-claim/references/CLAIMS.md':
         'stale claims\n',
-      '.agents/skills/semantic-claims/references/SEMANTICS.md':
+      '.agents/skills/semantic-claims-claim/references/SEMANTICS.md':
         'stale semantics\n',
-      '.agents/skills/semantic-claims/references/README.md':
+      '.agents/skills/semantic-claims-claim/references/README.md':
         'stale readme\n',
-      '.agents/skills/semantic-claims/references/REFERENCE.md':
+      '.agents/skills/semantic-claims-claim/references/REFERENCE.md':
         'stale reference\n',
-      '.agents/skills/semantic-claims/references/FAQ.md':
+      '.agents/skills/semantic-claims-claim/references/FAQ.md':
         'stale frequently asked questions\n',
-      '.agents/skills/semantic-claims/references/EXAMPLES.md':
+      '.agents/skills/semantic-claims-claim/references/EXAMPLES.md':
         'stale examples\n',
-      '.agents/skills/semantic-claims/references/EXISTING-SYSTEMS.md':
+      '.agents/skills/semantic-claims-claim/references/EXISTING-SYSTEMS.md':
         'stale existing systems\n',
-      '.agents/skills/semantic-claims/references/JAVASCRIPT.md':
+      '.agents/skills/semantic-claims-claim/references/JAVASCRIPT.md':
         'stale javascript conventions\n',
     });
 
@@ -112,7 +112,7 @@ describe('§1 — Generated method references', () => {
         const generated = await readFile(
           path.join(
             root,
-            '.agents/skills/semantic-claims/references',
+            '.agents/skills/semantic-claims-claim/references',
             document,
           ),
           'utf8',
@@ -124,7 +124,7 @@ describe('§1 — Generated method references', () => {
       expect(
         (
           await readdir(
-            path.join(root, '.agents/skills/semantic-claims/references'),
+            path.join(root, '.agents/skills/semantic-claims-claim/references'),
           )
         ).sort(),
       ).toEqual([
