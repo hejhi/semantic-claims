@@ -41,6 +41,22 @@ search/
 
 If a proof unexpectedly fails, use its claim to check the intended outcome before changing the proof or implementation.
 
+## Design and planning
+
+Use Semantic Claims within your existing design and planning process:
+
+| Activity | Question |
+| --- | --- |
+| Design exploration | What should we build, for whom, and which tradeoffs should we accept? |
+| Claiming | Which intended observable behaviors warrant claims, and how do we state them precisely? |
+| Implementation planning | How will we build and verify those behaviors? |
+
+You can draft claims during design, write them after design decisions are settled, or add them to existing software once its intended behavior is established. Claiming requires clear intent for the behavior in scope; a separate design phase is optional.
+
+When working with an agent in planning mode, use the conversation to explore design, draft claim wording, and plan implementation. Claims don't need to exist before planning begins. Revisit proposed claims and design decisions as needed while assessing feasibility. When execution begins, write or update the accepted claim documents before their proofs and implementation.
+
+Keep useful design rationale and implementation steps in your design notes or plan. Maintain the claims alongside the code as the record of intended behavior after the planned work is complete.
+
 ## In practice
 
 ### Claim documents
