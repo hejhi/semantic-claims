@@ -26,20 +26,87 @@ claim  ->  prove  ->  implement
 
 Breaking down the steps:
 
-1. **claim**: state the intended observable behavior
+1. **claim**: state the intended observable behavior in a well-formed Markdown file
 2. **prove**: write tests that prove the implementation exhibits the claimed behavior
 3. **implement**: write or update the implementation until the proofs pass
 
 This produces three colocated artifacts. For example, in a TS codebase:
 
 ```text
-search/
-├── search-results.scenarios.md       <- the subject's semantic claims
-├── search-results.scenarios.test.ts  <- the subject's semantic proofs
-└── search-results.ts                 <- the subject itself
+src/
+├── range.invariants.md       <- the subject's semantic claims
+├── range.invariants.test.ts  <- the subject's semantic proofs
+└── range.ts                 <- the subject itself
 ```
 
 If a proof unexpectedly fails, use its claim to check the intended outcome before changing the proof or implementation.
+
+## In practice
+
+### Claim documents
+
+Claim documents are well-formed Markdown files that enumerate a subject's intended observable behaviors. In this example, a numeric range includes both endpoints.
+
+The claim document from above (`src/range.invariants.md`) contains a single claim:
+
+```md
+# Range
+
+## §1 Endpoint inclusion
+
+### §1.1 Both endpoints belong to the range
+
+A value equal to either endpoint is included.
+```
+
+This is a (non-exhaustive) minimal, well-formed claim document:
+
+1. `Range` is the **subject** (semantic scope) of the claims
+2. `Endpoint inclusion` is a **claim set**, grouping one or more claims together
+3. `Both endpoints belong to the range` is a single **claim**
+4. `A value equal to either endpoint is included.` is the claim's statement
+
+Implementation changes that preserve the claimed behavior should not require claim edits. If routine implementation changes require new claim wording or a new subject name, check whether you have described a private mechanism or chosen an incomplete scope.
+
+### Proofs
+
+Each claim document has one paired **proof** file containing tests of its claimed behaviors. In this JS/TS example, the paired proof is named `src/range.invariants.test.ts`, and its tests repeat the section and claim titles _exactly_:
+
+```ts
+describe('§1 Endpoint inclusion', () => {
+  it('§1.1 Both endpoints belong to the range', () => {
+    const range = createRange(2, 5);
+
+    expect(range.includes(2)).toBe(true);
+    expect(range.includes(5)).toBe(true);
+  });
+});
+```
+
+The colocation and matching structure allow tools like the checker provided in this package to verify links between well-structured claims and proofs, as well as catch issues like missing proofs.
+
+### Claim kinds and scope
+
+There are two kinds of claims:
+
+- an [**invariant**](./REFERENCE.md#claim-kinds) states semantics that remain true whenever its conditions apply
+- a [**scenario**](./REFERENCE.md#claim-kinds) states semantics whose expected result depends on event order
+
+Invariants are direct statements, while scenarios can be structured with Given/When/Then to make the conditions, events, and outcomes easier to follow (it's not a requirement though—you do you).
+
+**Cross-cutting claims** are a way to scope and specify semantics belonging to an interaction between multiple subjects. For example, a claim about the interaction between a search filter and published results can be placed alongside both subjects:
+
+```text
+search/
+├── --search-submission.scenarios.md
+├── --search-submission.scenarios.test.ts
+├── search-filter.ts
+├── search-results.scenarios.md
+├── search-results.scenarios.test.ts
+└── search-results.ts
+```
+
+The cross-cutting claim sits in `search/`—the closest directory containing files for both subjects. Its `--` prefix distinguishes it from claims about either local subject.
 
 ## Design and planning
 
@@ -56,77 +123,6 @@ You can draft claims during design, write them after design decisions are settle
 When working with an agent in planning mode, use the conversation to explore design, draft claim wording, and plan implementation. Claims don't need to exist before planning begins. Revisit proposed claims and design decisions as needed while assessing feasibility. When execution begins, write or update the accepted claim documents before their proofs and implementation.
 
 Keep useful design rationale and implementation steps in your design notes or plan. Maintain the claims alongside the code as the record of intended behavior after the planned work is complete.
-
-## In practice
-
-### Claim documents
-
-Claim documents are well-formed Markdown files that enumerate a subject's intended observable behaviors. Choose a subject that includes the complete observable outcome—for example, which search results remain published when requests overlap.
-
-The below example shows the claim document from above (`search/search-results.scenarios.md`) claiming a single behavior:
-
-```md
-# Search results
-
-## §1 Search precedence
-
-### §1.1 Newer searches supersede older results
-
-**Given** an older search is in progress,
-**When** a newer search begins and the older search later completes,
-**Then** the older result doesn't replace the latest result.
-```
-
-This is a (non-exhaustive) minimal, well-formed claim document:
-
-1. `Search results` is the **subject** (semantic scope) of the claims
-2. `Search precedence` is a **claim set**, grouping one or more claims together
-3. `Newer searches supersede...` is a single **claim**
-4. The scenario's Given/When/Then statement specifies the behavior being claimed
-
-Implementation changes that preserve the claimed behavior should not require claim edits. If routine implementation changes require new claim wording or a new subject name, check whether you have described a private mechanism or chosen an incomplete scope.
-
-There are two kinds of claims:
-
-- an [**invariant**](./REFERENCE.md#claim-kinds) states semantics that remain true whenever its conditions apply
-- a [**scenario**](./REFERENCE.md#claim-kinds) states semantics whose expected result depends on event order
-
-Invariants are direct statements, while scenarios can be structured with Given/When/Then to make the conditions, events, and outcomes easier to follow (it's not a requirement though—you do you).
-
-**Cross-cutting claims** are a way to scope and specify semantics belonging to an interaction between multiple subjects. Here's the same example as before, with a new claim about the interaction between the search filter and published results:
-
-```text
-search/
-├── --search-submission.scenarios.md       <- new!
-├── --search-submission.scenarios.test.ts  <- new!
-├── search-filter.ts
-├── search-results.scenarios.md
-├── search-results.scenarios.test.ts
-└── search-results.ts
-```
-
-The cross-cutting claim sits in `search/`—the closest directory containing files for both subjects. Its `--` prefix distinguishes it from claims about either local subject.
-
-### Proofs
-
-Each claim document has one paired **proof** file containing tests of its claimed behaviors. In this JS/TS example, the paired proof is named `search/search-results.scenarios.test.ts`, and its tests repeat the section and claim titles _exactly_:
-
-```ts
-describe('§1 Search precedence', () => {
-  it('§1.1 Newer searches supersede older results', () => {
-    const older = searches.start();
-    const newer = searches.start();
-
-    older.resolve('older');
-    expect(searches.latest()).not.toBe('older');
-
-    newer.resolve('newer');
-    expect(searches.latest()).toBe('newer');
-  });
-});
-```
-
-The colocation and matching structure allow tools like the checker provided in this package to verify links between well-structured claims and proofs, as well as catch issues like missing proofs.
 
 ## Tooling
 
