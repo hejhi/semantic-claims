@@ -2,21 +2,21 @@
 
 For a quick and accessible introduction, description, and example, start with the [README](./README.md).
 
+The method requires stating intended observable behavior before writing proofs and implementation, linking each claim to executable tests, and reviewing the three together. The Markdown headings and filenames below are conventions for recording and locating those artifacts. The supplied checker requires this document format and the [JavaScript and TypeScript proof conventions](./JAVASCRIPT.md).
+
 ## Semantics
 
 Semantics are the intended observable behaviors of whatever is being built.
 
 ## Subjects
 
-A subject is a coherent semantic scope of any granularity, from a system or protocol to a component or small shared helper. The primary criterion is that it's semantically coherent and can be clearly named. Its name should reflect its semantics, and remain valid through implementation changes—or as long as its semantics don't change.
-
-Semantic Claims encourages breaking down implementation candidates (as in, something specified by designs, specs, requirements, etc) into such subjects. A good heuristic is to choose the narrowest clearly named scope that owns the complete observable behavior.
+A subject represents a coherent and complete set of intentional observable behavior—from a system or protocol to a component or shared helper. A subject name should remain valid through implementation changes as long as the intended behavior stays the same.
 
 For example, consider this requirement:
 
 > When two searches overlap, completing the older request must not replace the results for the newer search.
 
-The complete observable behavior concerns which results remain published, so **Search results** is the subject. **Search request** is too narrow because one request doesn't own the outcome, while **Search** is broader than the behavior requires.
+The complete observable outcome is which results remain published, so **Search results** is the subject. **Search request** is too narrow because the outcome depends on more than one request, while **Search** includes behavior beyond result publication.
 
 ## Claims
 
@@ -63,9 +63,11 @@ The document is placed in the closest directory that contains files for every su
 
 The first step is making sure the subject's behavior is clear, meaningful, and observable. A claim should be written when changing or removing the behavior would affect an intended outcome an observer relies on. If an existing claim already requires the same result under the same conditions, it doesn't need another one.
 
+Specify every warranted behavior in scope, avoiding redundant claims. More than one grouping may be reasonable; choose one readers can follow. There is no requirement to find the fewest possible claims.
+
 ### Document structure
 
-A claim document has a specific structure consisting of four parts:
+The Markdown format uses identifiers and headings so readers and tools can locate claims and their proofs consistently. A claim document has four parts:
 
 1. An `#` heading with the subject's name in ordinary language.
 2. An optional introduction that clarifies what the subject includes.
@@ -84,7 +86,7 @@ This way, a new claim can take any unused identifier in its section, and then be
 
 ## Proofs
 
-Every claim is verified by one or more executable tests that form the claim’s proof. Each test must link unambiguously to the claim, though languages and test frameworks may represent that link differently.
+Each claim document pairs with one proof file in the same directory. Every claim is verified by one or more executable tests in that file that form the claim’s proof. Each test must link unambiguously to the claim, though languages and test frameworks may represent that link differently.
 
 For JavaScript and TypeScript, the filename and test structure conventions are detailed in [JAVASCRIPT.md](./JAVASCRIPT.md). This repo's checker validates the links, while project test runners are responsible for executing proofs.
 
@@ -94,12 +96,7 @@ If the intended behavior has changed, the claim should be updated first. If it h
 
 ## Methodology
 
-First, Semantic Claims begins after the intended behavior has been mapped, whether it's through requirements, specifications, or designs. Then:
-
-- identify subjects with coherent observable behavior
-- decide which behavior warrants claims and write each subject’s claim documents
-- create proof files that test claim semantics
-- write the implementation to pass the proof
+Begin with intended behavior established through requirements, specifications, or designs.
 
 When adding or changing intended behavior:
 

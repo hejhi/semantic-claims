@@ -2,6 +2,8 @@
 
 These conventions define how the `semantic-claims` checker links Markdown claim documents to JavaScript and TypeScript proof files. They supplement the model's [detailed reference](./REFERENCE.md).
 
+The file pairing, identifiers, exact titles, and test structure below are required when using the supplied checker. Other languages and test frameworks may represent claim-to-proof links differently, provided each test links unambiguously to its claim.
+
 ## File pairing
 
 Each claim document pairs with exactly one proof file in the same directory. The files share the same name through the claim kind:

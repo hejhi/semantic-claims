@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { loadRepository } from '../check-semantics/repository.mjs';
 
-export class ExplorerModelError extends Error {
+class ExplorerModelError extends Error {
   constructor(errors) {
     super(`Semantic Explorer could not load valid claims and proofs:\n${errors
       .map((error) => `- ${error}`)

@@ -1,6 +1,6 @@
 # Overview
 
-See the [README](./README.md) for a run-through and a simple example.
+See the [README](./README.md) for the walkthrough, examples, package usage, and repository links.
 
 ## Motivation
 
@@ -20,31 +20,16 @@ See [this blog post](https://dev.to/hejhi/semantic-claims-conveying-intent-and-v
 
 ## Goals
 
-### Creating focused local context
+### Focused local context
 
-When a semantic contract is linked to executable proofs and colocated with an implementation, anyone exploring the domain can quickly understand its meaningful, intended behavior. Cross-cutting claims sitting above it can also be inspected for greater system-level reasoning. These claims and proofs can be explored entirely separately from code to get a quick understanding of semantics, terminology, APIs, and behavior.
+By keeping claims and proofs beside the implementation, contributors can inspect the intended behavior relevant to their task without reading every project requirement. They can also inspect applicable cross-cutting claims to understand behavior at interactions among subjects.
 
-### Clearer instructions
+### Reviewable changes
 
-Claims and proofs around coherent subjects reduce ambiguity...for everyone. There's less to infer when fewer code paths need to be traced through for understanding.
+Reviewers can compare a changed claim with its proof and implementation in the same diff. They can assess whether the intended behavior changed and whether the tests exercise that behavior.
 
-Agents with higher intelligence can also author claims from technical designs, while delegating to less intelligent agents for writing proofs and implementations.
+### Explicit intent
 
-**Always remember: human guidance, oversight, and review is still a must!** 👍🌈🦄
+Writing claims before proofs and implementation requires contributors to settle the intended outcome before selecting test cases or implementation details. Current behavior alone is insufficient evidence of intent.
 
-### Clearer diffs
-
-Changes to claims, proofs, and implementations appear brightly as a coherent unit.
-
-### Semantics-first
-
-Defining a subject and its semantic contract requires thinking about semantics before implementation, which provides a clarity downstream to proofs and implementation.
-
-## Repository guide
-
-- [REFERENCE.md](./REFERENCE.md): the detailed rules for claims, proofs, document structure, and the authoring workflow.
-- [EXAMPLES.md](./EXAMPLES.md): claim-decision examples and borderline cases.
-- [JAVASCRIPT.md](./JAVASCRIPT.md): the JavaScript and TypeScript conventions.
-- [FAQ.md](./FAQ.md): common questions about Semantic Claims, TDD, and acceptance criteria.
-- [`scripts/check-semantics.mjs`](./scripts/check-semantics.mjs) checks JavaScript and TypeScript claim-and-proof pairing.
-- [`.agents/skills/semantic-claims`](./.agents/skills/semantic-claims): instructions for coding agents.
+People still decide which behavior is intended and review whether the claims and proofs describe and test it adequately.

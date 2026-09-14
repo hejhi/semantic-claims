@@ -61,7 +61,7 @@ An accepted return remains visible until its resolution is recorded.
 `,
 };
 
-export async function writeFixture(): Promise<string> {
+async function writeFixture(): Promise<string> {
   const root = await mkdtemp(
     path.join(tmpdir(), 'semantic-claims-explorer-'),
   );

@@ -2,16 +2,16 @@
 
 This repository defines the Semantic Claims Model: a method for connecting behavioral claims to executable proofs and the implementations that satisfy them.
 
-## Read first
+## Task context
 
-Before changing the model or tooling, read:
+Read the documents relevant to the task:
 
-1. [README.md](./README.md)
-2. [OVERVIEW.md](./OVERVIEW.md)
-3. [FAQ.md](./FAQ.md)
-4. [REFERENCE.md](./REFERENCE.md)
-5. [EXAMPLES.md](./EXAMPLES.md)
-6. [JAVASCRIPT.md](./JAVASCRIPT.md)
+- [README.md](./README.md) for an introduction or package usage
+- [OVERVIEW.md](./OVERVIEW.md) for motivation and rationale
+- [REFERENCE.md](./REFERENCE.md) for method changes and claim structure
+- [FAQ.md](./FAQ.md) for comparisons with TDD or acceptance criteria
+- [EXAMPLES.md](./EXAMPLES.md) for claim decisions and borderline cases
+- [JAVASCRIPT.md](./JAVASCRIPT.md) for JavaScript or TypeScript proof and checker changes
 
 Use the [`semantic-claims`](./.agents/skills/semantic-claims) skill when creating, editing, auditing, or reviewing claims or claim documents, or when changing their checker.
 
@@ -28,7 +28,7 @@ Do not infer a new claim from an existing implementation. First understand the s
 ## Working rules
 
 - Use the ordinary domain language of the subject.
-- Prefer the smallest set of non-overlapping claims that specifies every warranted observable behavior of the subject.
+- Specify every warranted observable behavior of the subject, avoiding redundant claims.
 - Use a `--name` claim document only for distinct behavior at the interaction among multiple local subjects, never to summarize or repeat their claims.
 - Keep implementation details out of claims unless they are themselves observable behavior.
 - Write or update claims for every warranted observable behavior before their proofs and implementation.
@@ -40,4 +40,4 @@ Do not infer a new claim from an existing implementation. First understand the s
 
 ## Verification
 
-Run the narrowest relevant checks first, followed by the repository's full available checks. For checker changes, verify valid and invalid fixtures, including exact title matching for both invariants and scenarios.
+For documentation and skill edits, check the changed instructions, links, and any affected generated references. For code changes, run the narrowest relevant checks first, followed by the repository's full available checks. For checker changes, verify valid and invalid fixtures, including exact title matching for both invariants and scenarios.

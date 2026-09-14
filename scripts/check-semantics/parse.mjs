@@ -5,11 +5,11 @@ const SECTION_TITLE_RE =
 const CLAIM_TITLE_RE =
   /^§([0-9]+(?:\.[0-9]+)+)(?:\s*(?:—|--|-|–|:)\s*|\s+)(.*?)\s*$/;
 
-export function parseSectionTitle(title) {
+function parseSectionTitle(title) {
   return parseTitle(title, SECTION_ID_RE, SECTION_TITLE_RE);
 }
 
-export function parseClaimTitle(title) {
+function parseClaimTitle(title) {
   return parseTitle(title, CLAIM_ID_RE, CLAIM_TITLE_RE);
 }
 
