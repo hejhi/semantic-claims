@@ -126,7 +126,7 @@ Keep useful design rationale and implementation steps in your design notes or pl
 
 ## Tooling
 
-The repo also includes a [JS and TS claim checker and local Semantic Explorer](https://github.com/hejhi/semantic-claims/blob/main/scripts/check-semantics.mjs), plus [agent skills](https://github.com/hejhi/semantic-claims/tree/main/.agents/skills) that can be used to help integrate the method into development workflows.
+The repo also includes a [JS and TS claim checker and local Semantic Explorer](https://github.com/hejhi/semantic-claims/blob/main/scripts/check-semantics.mjs), plus an [agent skill](https://github.com/hejhi/semantic-claims/tree/main/.agents/skills) that can be used to help integrate the method into development workflows.
 
 Fun fact! Semantic Claims were used to build the [validation scripts](https://github.com/hejhi/semantic-claims/tree/main/scripts), if you want to see the model in action.
 
@@ -173,28 +173,30 @@ The command checks the claim links, starts a read-only local server, and prints 
 
 ![Semantic Explorer showing claims grouped by subject](https://raw.githubusercontent.com/hejhi/semantic-claims/main/assets/semantic-explorer.png)
 
-### Install the agent skills
+### Install the agent skill
 
-The four Semantic Claims skills follow the open [Agent Skills specification](https://agentskills.io). Select a skill in your agent's skill picker or mention it by name:
-
-| Skill | Purpose |
-| --- | --- |
-| `semantic-claims-claim` | Decide and author warranted claims. |
-| `semantic-claims-prove` | Write and run executable proofs for accepted claims. |
-| `semantic-claims-implement` | Implement the claimed behavior and verify it. |
-| `semantic-claims-review` | Review claims, proofs, and implementation together. |
-
-Each skill completes the requested stage. They share one copy of the method guidance and references, included with `semantic-claims-claim`, so install it alongside any of the others.
-
-From a project root, install all four with the [`skills` CLI](https://skills.sh):
+The Semantic Claims skill follows the open [Agent Skills specification](https://agentskills.io). From a project root, install it with the [`skills` CLI](https://skills.sh):
 
 ```sh
-npx skills add hejhi/semantic-claims --skill '*'
+npx skills add hejhi/semantic-claims
 ```
 
-Append a release tag, such as `hejhi/semantic-claims#v0.1.0`, to install the skills matching that checker release. Update or remove them with `npx skills update` and `npx skills remove`.
+Append a release tag, such as `hejhi/semantic-claims#v0.1.0`, to install the skill matching that checker release. Update or remove it with `npx skills update` and `npx skills remove`.
 
-Skills installed by the earlier `semantic-claims skill` command are replaced by `npx skills add`. Delete any previous single `.agents/skills/semantic-claims` skill directory by hand.
+Earlier releases installed four `semantic-claims-*` skills. Delete those directories after installing this one.
+
+### Use the agent skill
+
+Select `semantic-claims` in your agent's skill picker, or mention Semantic Claims in a request, and describe the work:
+
+| Ask for | Example |
+| --- | --- |
+| Claims | "Write claims for how `Range` treats its endpoints." |
+| Proofs | "Write proofs for the claims in `src/range.invariants.md`." |
+| Implementation | "Add an `overlaps` method to `Range`." |
+| A review | "Review this diff against its claims." |
+
+A request for claims or proofs completes only that stage. Feature work and bug fixes include the claim and proof updates they need.
 
 ### Remove it
 

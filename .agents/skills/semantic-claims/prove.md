@@ -1,11 +1,4 @@
----
-name: semantic-claims-prove
-description: Write executable proofs for accepted Semantic Claims. Use when adding, repairing, or strengthening proof tests.
----
-
 # Prove
-
-Read the [shared guidance](../semantic-claims-claim/GUIDE.md) and the references relevant to the request.
 
 Use accepted claims to write or repair their paired proof files. Test the observable behavior at the subject's supported boundary, including relevant conditions and event orders. Follow the project's exact proof-linking conventions.
 

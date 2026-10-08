@@ -9,7 +9,7 @@ import {
 } from 'node:fs/promises';
 import path from 'node:path';
 
-const SOURCE = '.agents/skills/semantic-claims-claim';
+const SOURCE = '.agents/skills/semantic-claims';
 const SEMANTIC_CLAIMS_DOCS = [
   'README.md',
   'REFERENCE.md',

@@ -14,20 +14,17 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SKILL_NAMES = [
-  'semantic-claims-claim',
-  'semantic-claims-prove',
-  'semantic-claims-implement',
-  'semantic-claims-review',
-];
 const SKILL_FILES = [
-  ...SKILL_NAMES.map((name) => `.agents/skills/${name}/SKILL.md`),
-  '.agents/skills/semantic-claims-claim/GUIDE.md',
-  '.agents/skills/semantic-claims-claim/references/EXAMPLES.md',
-  '.agents/skills/semantic-claims-claim/references/FAQ.md',
-  '.agents/skills/semantic-claims-claim/references/JAVASCRIPT.md',
-  '.agents/skills/semantic-claims-claim/references/README.md',
-  '.agents/skills/semantic-claims-claim/references/REFERENCE.md',
+  '.agents/skills/semantic-claims/SKILL.md',
+  '.agents/skills/semantic-claims/claim.md',
+  '.agents/skills/semantic-claims/implement.md',
+  '.agents/skills/semantic-claims/prove.md',
+  '.agents/skills/semantic-claims/references/EXAMPLES.md',
+  '.agents/skills/semantic-claims/references/FAQ.md',
+  '.agents/skills/semantic-claims/references/JAVASCRIPT.md',
+  '.agents/skills/semantic-claims/references/README.md',
+  '.agents/skills/semantic-claims/references/REFERENCE.md',
+  '.agents/skills/semantic-claims/review.md',
 ];
 const EXPECTED_FILES = [
   ...SKILL_FILES,

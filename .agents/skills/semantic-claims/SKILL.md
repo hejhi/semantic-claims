@@ -1,6 +1,18 @@
-# Shared Semantic Claims Guidance
+---
+name: semantic-claims
+description: Decide, author, prove, implement, and review Semantic Claims. Use when defining intended behavior, writing claim documents or proof tests, implementing claimed behavior, or reviewing claims, proofs, and implementation, including claim-checker failures.
+---
 
-Use the requested subject's local claims and applicable ancestor `--` claim documents as context. The selected skill defines the scope of work; invoking one stage does not require completing the later stages.
+# Semantic Claims
+
+Read the instructions for the stage the request asks for:
+
+- [Claim](claim.md) to define intended behavior or draft and revise claim documents
+- [Prove](prove.md) to add, repair, or strengthen proof tests
+- [Implement](implement.md) for feature work or bug fixes that must satisfy claims and executable proofs
+- [Review](review.md) for semantic reviews of a subject or diff, including claim-checker failures
+
+The requested stage defines the scope of work; a request for one stage does not require completing the later stages. Use the requested subject's local claims and applicable ancestor `--` claim documents as context.
 
 Read only the references relevant to the task:
 
