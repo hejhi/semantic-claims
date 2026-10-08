@@ -130,10 +130,10 @@ The repo also includes a [JS and TS claim checker and local Semantic Explorer](h
 
 Fun fact! Semantic Claims were used to build the [validation scripts](https://github.com/hejhi/semantic-claims/tree/main/scripts), if you want to see the model in action.
 
-You can install the (alpha) checker as a dev dependency:
+You can install the checker as a dev dependency:
 
 ```sh
-npm install --save-dev semantic-claims@alpha
+npm install --save-dev semantic-claims
 ```
 
 It supports Node 22 and newer. I've also used it successfully in a pnpm monorepo, but ymmv.
@@ -184,37 +184,17 @@ The four Semantic Claims skills follow the open [Agent Skills specification](htt
 | `semantic-claims-implement` | Implement the claimed behavior and verify it. |
 | `semantic-claims-review` | Review claims, proofs, and implementation together. |
 
-Each skill completes the requested stage. They share one copy of the method guidance and references, included with `semantic-claims-claim`.
+Each skill completes the requested stage. They share one copy of the method guidance and references, included with `semantic-claims-claim`, so install it alongside any of the others.
 
-From a project root, install all four into `.agents/skills`:
-
-```sh
-npx semantic-claims@alpha skill install
-```
-
-You can provide a different skills directory:
+From a project root, install all four with the [`skills` CLI](https://skills.sh):
 
 ```sh
-npx semantic-claims@alpha skill install /path/to/skills
+npx skills add hejhi/semantic-claims --skill '*'
 ```
 
-If no directory is specified, installation, update, and removal use `.agents/skills`. Each skill has its own named subdirectory.
+Append a release tag, such as `hejhi/semantic-claims#v0.1.0`, to install the skills matching that checker release. Update or remove them with `npx skills update` and `npx skills remove`.
 
-Run the corresponding command from the project root, or pass the same explicit directory, to update all four skills to the version provided by the selected package release. Update also restores missing skills and migrates the previous single `semantic-claims` skill to the four new entries:
-
-```sh
-npx semantic-claims@alpha skill update
-npx semantic-claims@alpha skill update /path/to/skills
-```
-
-Remove the skills in the same way:
-
-```sh
-npx semantic-claims@alpha skill remove
-npx semantic-claims@alpha skill remove /path/to/skills
-```
-
-Installation refuses to replace any existing entry with one of the four skill names or the legacy `semantic-claims` name. Update and removal verify the identity of every affected entry before changing anything. Other skills are left unchanged.
+Skills installed by the earlier `semantic-claims skill` command are replaced by `npx skills add`. Delete any previous single `.agents/skills/semantic-claims` skill directory by hand.
 
 ### Remove it
 

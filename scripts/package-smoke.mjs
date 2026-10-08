@@ -45,7 +45,6 @@ const EXPECTED_FILES = [
   'scripts/check-semantics/repository.mjs',
   'scripts/check-semantics/typescript.mjs',
   'scripts/check-semantics/validate.mjs',
-  'scripts/skill-management.mjs',
   'scripts/semantic-explorer/model.mjs',
   'scripts/semantic-explorer/render.mjs',
   'scripts/semantic-explorer/server.mjs',
@@ -236,11 +235,6 @@ async function verifyInstalledManifest(packageRoot) {
     'Installed TypeScript dependency',
   );
   assertEqual(
-    manifest.dependencies?.yaml,
-    '^2.9.0',
-    'Installed YAML dependency',
-  );
-  assertEqual(
     manifest.repository,
     {
       type: 'git',
@@ -263,7 +257,6 @@ async function verifyInstalledManifest(packageRoot) {
     {
       access: 'public',
       registry: 'https://registry.npmjs.org/',
-      tag: 'alpha',
     },
     'Installed package publication metadata',
   );
@@ -362,74 +355,6 @@ The matching static proof title provides structural coverage.
   );
 
   await writeFile(proofPath, validProof);
-}
-
-async function exerciseInstalledSkillManagement(
-  fixtureRoot,
-  installedPackageRoot,
-  environment,
-) {
-  for (const directory of ['agent-skills', null]) {
-    const destination = path.join(fixtureRoot, directory ?? '.agents/skills');
-    const directoryArguments = directory === null ? [] : [destination];
-    const run = (operation) => runNpm(
-      ['exec', '--no', '--', 'semantic-claims', 'skill', operation, ...directoryArguments],
-      { cwd: fixtureRoot, env: environment },
-    );
-
-    requireSuccess(await run('install'), 'Installed skills installation');
-    for (const file of SKILL_FILES) {
-      const relative = file.slice('.agents/skills/'.length);
-      assertEqual(
-        await readFile(path.join(destination, relative), 'utf8'),
-        await readFile(path.join(installedPackageRoot, file), 'utf8'),
-        `Installed ${relative}`,
-      );
-    }
-    await verifyMarkdownLinks(destination, SKILL_FILES.map((file) => file.slice('.agents/skills/'.length)));
-
-    for (const name of SKILL_NAMES) {
-      await writeFile(path.join(destination, name, 'obsolete.txt'), 'obsolete\n');
-    }
-    requireSuccess(await run('update'), 'Installed skills update');
-    for (const name of SKILL_NAMES) {
-      try {
-        await access(path.join(destination, name, 'obsolete.txt'));
-        throw new Error(`Installed skills update retained an obsolete file in ${name}.`);
-      } catch (error) {
-        if (error.code !== 'ENOENT') throw error;
-      }
-    }
-
-    requireSuccess(await run('remove'), 'Installed skills removal');
-    for (const name of SKILL_NAMES) {
-      try {
-        await access(path.join(destination, name));
-        throw new Error(`Installed skills removal left ${name} in place.`);
-      } catch (error) {
-        if (error.code !== 'ENOENT') throw error;
-      }
-    }
-
-    const legacy = path.join(destination, 'semantic-claims');
-    await mkdir(legacy);
-    await writeFile(path.join(legacy, 'SKILL.md'), '---\nname: semantic-claims\ndescription: Legacy skill\n---\n');
-    requireSuccess(await run('update'), 'Installed legacy skill migration');
-    for (const file of SKILL_FILES) {
-      assertEqual(
-        await readFile(path.join(destination, file.slice('.agents/skills/'.length)), 'utf8'),
-        await readFile(path.join(installedPackageRoot, file), 'utf8'),
-        `Migrated ${file}`,
-      );
-    }
-    try {
-      await access(legacy);
-      throw new Error('Legacy skill remained after migration.');
-    } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
-    }
-    requireSuccess(await run('remove'), 'Migrated skills removal');
-  }
 }
 
 async function exerciseInstalledExplorer(
@@ -632,11 +557,6 @@ async function verifyPackage(expectedNode, temporaryRoot) {
   await verifyInstalledManifest(installedPackageRoot);
   await verifyMarkdownLinks(installedPackageRoot);
   await exerciseInstalledChecker(fixtureRoot, environment);
-  await exerciseInstalledSkillManagement(
-    fixtureRoot,
-    installedPackageRoot,
-    environment,
-  );
   await exerciseInstalledExplorer(
     fixtureRoot,
     installedPackageRoot,

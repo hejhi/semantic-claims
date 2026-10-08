@@ -33,7 +33,6 @@
     "scripts/check-semantics/repository.mjs",
     "scripts/check-semantics/typescript.mjs",
     "scripts/check-semantics/validate.mjs",
-    "scripts/skill-management.mjs",
     "scripts/semantic-explorer/model.mjs",
     "scripts/semantic-explorer/render.mjs",
     "scripts/semantic-explorer/server.mjs"
@@ -43,8 +42,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "tag": "alpha"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "check:semantics": "bun scripts/check-semantics.mjs",
@@ -58,7 +56,6 @@
     "test:package": "bun run test:package:node22"
   },
   "dependencies": {
-    "typescript": "7.0.2",
-    "yaml": "^2.9.0"
+    "typescript": "7.0.2"
   }
 }
