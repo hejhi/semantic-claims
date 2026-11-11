@@ -25,7 +25,7 @@ describe('§1 — Claims and proofs', () => {
         subjectId: 'src/orders',
         title: 'Completed orders remain visible',
         statement:
-          'The completed order remains visible while its receipt is prepared.',
+          'The order list SHALL include every completed order and its receipt.',
         claimDocument: {
           line: 5,
           path: 'src/orders.invariants.md',

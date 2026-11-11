@@ -5,18 +5,18 @@ import path from "node:path";
 const SUBJECTS = [
   {
     path: "src/auth/session",
-    title: "User Session",
-    invariants: [
+    title: "Session",
+    scenarios: [
       [
         "Accepted identity",
         [
           [
             "Accepted sessions expose their verified identity",
-            "An accepted session exposes the identity established by its successful authentication.",
+            "WHILE the session is accepted, WHEN the session's identity is requested, the session SHALL provide the session's verified identity.",
           ],
           [
             "Expired sessions reject protected work",
-            "An expired session rejects protected work without extending its lifetime.",
+            "WHILE the session is expired, WHEN the session is checked for permission to perform protected work, the session SHALL deny the permission.",
           ],
         ],
       ],
@@ -25,22 +25,20 @@ const SUBJECTS = [
         [
           [
             "Session state remains isolated by browser context",
-            "Changing one browser context's session leaves every other browser context unchanged.",
+            "WHEN sessions are requested for different browser contexts, the session SHALL provide a distinct session for each browser context.",
           ],
         ],
       ],
-    ],
-    scenarios: [
       [
         "Renewal",
         [
           [
             "Renewal preserves the active identity",
-            "After an accepted session renews, it continues to expose the same verified identity.",
+            "WHEN the identity of an accepted session is requested after the session renews, the session SHALL provide the verified identity from before the renewal.",
           ],
           [
             "Revocation wins over pending renewal",
-            "After revocation begins, completing an earlier renewal cannot restore the session.",
+            "WHEN an earlier renewal completes after revocation begins, the session SHALL remain revoked.",
           ],
         ],
       ],
@@ -48,18 +46,18 @@ const SUBJECTS = [
   },
   {
     path: "src/search/result-publication",
-    title: "Published Search Results",
+    title: "Search",
     scenarios: [
       [
         "Precedence",
         [
           [
             "Newer searches supersede older results",
-            "After a newer search begins, completing an older search leaves the published result unchanged.",
+            "WHEN an older search completes after a newer search begins, the search SHALL leave the published result unchanged.",
           ],
           [
             "The current search can publish its result",
-            "After a search begins, its successful completion publishes its result while it remains current.",
+            "WHEN the current search completes successfully, the search SHALL publish the current search's result.",
           ],
         ],
       ],
@@ -68,7 +66,7 @@ const SUBJECTS = [
         [
           [
             "An older failure does not replace newer results",
-            "After a newer search publishes a result, failure of an older search leaves that result visible.",
+            "WHEN an older search fails after a newer search publishes a result, the search SHALL leave that result visible.",
           ],
         ],
       ],
@@ -76,29 +74,27 @@ const SUBJECTS = [
   },
   {
     path: "src/editor/history",
-    title: "Document History",
-    invariants: [
+    title: "History",
+    scenarios: [
       [
         "Recorded changes",
         [
           [
-            "Undo restores the preceding document state",
-            "Undo restores the complete document state that preceded the latest recorded change.",
+            "Each undo restores a whole document",
+            "WHEN an undo is requested, the history SHALL restore the whole document as the document was before the latest edit.",
           ],
           [
-            "A new edit clears the redo path",
-            "Recording a new edit after undo removes the abandoned redo path.",
+            "Undoing an edit enables redo",
+            "WHEN an edit is undone, the history SHALL offer a redo of the edit.",
           ],
         ],
       ],
-    ],
-    scenarios: [
       [
         "Concurrent input",
         [
           [
             "Remote changes retain local undo meaning",
-            "After a remote change arrives, undoing a local edit reverses that local edit without removing the remote change.",
+            "WHEN a local edit is undone after a remote change arrives, the history SHALL produce a document that contains the remote change and excludes that local edit.",
           ],
         ],
       ],
@@ -106,18 +102,18 @@ const SUBJECTS = [
   },
   {
     path: "src/cache/entries",
-    title: "Cached Entries",
-    invariants: [
+    title: "Cache",
+    scenarios: [
       [
         "Freshness",
         [
           [
-            "Fresh entries return their accepted value",
-            "A fresh entry returns its accepted value without requesting another copy.",
+            "Fresh entries are served",
+            "WHEN a fresh entry is requested, the cache SHALL serve the entry.",
           ],
           [
-            "Expired entries are not presented as fresh",
-            "An expired entry is never presented to callers as a fresh value.",
+            "Expired entries are reported as stale",
+            "WHEN an expired entry is checked for freshness, the cache SHALL report the entry as stale.",
           ],
         ],
       ],
@@ -125,8 +121,8 @@ const SUBJECTS = [
         "Rejection",
         [
           [
-            "Rejected updates preserve the accepted entry",
-            "Rejecting an update leaves the previously accepted entry unchanged.",
+            "Served entries are each valid",
+            "WHEN the cache's entries are requested, the cache SHALL serve entries that are each valid.",
           ],
         ],
       ],
@@ -134,18 +130,18 @@ const SUBJECTS = [
   },
   {
     path: "src/notifications/delivery",
-    title: "Notification Delivery",
+    title: "Notifier",
     scenarios: [
       [
         "Retries",
         [
           [
             "A retry does not duplicate an accepted delivery",
-            "After a notification is accepted by its destination, retrying the same delivery does not create another notification.",
+            "WHEN a delivery that the delivery's destination accepted is retried, the notifier SHALL leave the number of notifications unchanged.",
           ],
           [
             "Retry delay grows after consecutive failures",
-            "After consecutive delivery failures, each retry waits longer than the preceding retry until delivery succeeds.",
+            "WHEN a delivery fails after an earlier failed delivery, the notifier SHALL wait longer before the next retry than before the preceding retry.",
             12,
           ],
         ],
@@ -155,7 +151,7 @@ const SUBJECTS = [
         [
           [
             "Cancellation prevents pending delivery",
-            "After a pending notification is cancelled, later completion of its scheduled work does not deliver it.",
+            "WHEN the scheduled work of a cancelled notification completes, the notifier SHALL leave the notification undelivered.",
           ],
         ],
       ],
@@ -163,18 +159,18 @@ const SUBJECTS = [
   },
   {
     path: "src/billing/invoice",
-    title: "Invoice Totals",
+    title: "Invoice",
     invariants: [
       [
         "Amounts",
         [
           [
             "The total equals accepted lines plus tax",
-            "An invoice total equals the sum of its accepted line amounts and applicable tax.",
+            "The invoice SHALL show a total equal to the sum of the invoice's accepted line amounts and applicable tax.",
           ],
           [
-            "Rejected lines leave the total unchanged",
-            "Rejecting an invoice line leaves the accepted lines and total unchanged.",
+            "Every accepted line has a positive amount",
+            "The invoice SHALL list lines that each have a positive amount.",
           ],
         ],
       ],
@@ -182,29 +178,27 @@ const SUBJECTS = [
   },
   {
     path: "src/workspaces/membership",
-    title: "Workspace Membership",
-    invariants: [
+    title: "Workspace",
+    scenarios: [
       [
         "Authority",
         [
           [
             "Members receive only their assigned capabilities",
-            "A workspace member receives exactly the capabilities assigned through active roles.",
+            "WHEN a member's capabilities are checked, the workspace SHALL grant exactly the capabilities assigned through the member's active roles.",
           ],
           [
             "Removing the final role removes workspace access",
-            "A member without an active role has no access to the workspace.",
+            "WHEN a member with zero roles requests access, the workspace SHALL deny the member access.",
           ],
         ],
       ],
-    ],
-    scenarios: [
       [
         "Removal",
         [
           [
             "Removal invalidates an already-open workspace",
-            "After membership is removed, the next protected action in an already-open workspace is rejected.",
+            "WHEN a removed member performs a protected action in an already-open workspace, the workspace SHALL leave the workspace unchanged.",
           ],
         ],
       ],
@@ -212,37 +206,37 @@ const SUBJECTS = [
   },
   {
     path: "src/synchronization/remote-document-reconciliation",
-    title: "Remote Document Reconciliation",
+    title: "Document",
     scenarios: [
       [
         "Offline work",
         [
           [
             "Locally accepted edits survive reconnection",
-            "After reconnection, locally accepted edits remain present while remote edits are incorporated.",
+            "WHEN the client reconnects, the document SHALL contain both the locally accepted edits and the remote edits.",
           ],
           [
             "Repeated remote delivery has one observable effect",
-            "After a remote change is incorporated, receiving the same change again leaves the document unchanged.",
+            "WHEN a remote change that the document already incorporated arrives again, the document SHALL remain unchanged.",
           ],
         ],
       ],
     ],
   },
   {
-    path: "src/checkout/--payment-order-consistency",
-    title: "Payment and Order Consistency",
+    path: "src/search/--search-submission",
+    title: "Search Results",
     scenarios: [
       [
-        "Compensation",
+        "Submitted filters",
         [
           [
-            "Failed order creation releases payment first",
-            "After payment authorization succeeds, failed order creation releases the authorization before checkout reports failure.",
+            "Shown results match the submitted filter",
+            "WHEN a filter is submitted, the search results SHALL show exactly the results that match the submitted filter.",
           ],
           [
-            "Confirmed orders retain their payment authorization",
-            "After order creation succeeds, checkout confirms the order without releasing its payment authorization.",
+            "Clearing the filter shows every result",
+            "WHEN the filter is cleared, the search results SHALL show every result.",
           ],
         ],
       ],
@@ -250,18 +244,18 @@ const SUBJECTS = [
   },
   {
     path: "configuration",
-    title: "Runtime Configuration",
-    invariants: [
+    title: "Configuration",
+    scenarios: [
       [
         "Validation",
         [
           [
-            "Missing required values identify every absent key",
-            "Rejected configuration identifies every required key that has no value.",
+            "Missing required settings are listed",
+            "WHILE the configuration is rejected, WHEN the missing settings are requested, the configuration SHALL list exactly the required settings that are unset.",
           ],
           [
-            "Accepted configuration exposes normalized values",
-            "Accepted configuration exposes each value in its documented normalized form.",
+            "Accepted configuration serves normalized settings",
+            "WHILE the configuration is accepted, WHEN a setting is requested, the configuration SHALL provide the setting in the setting's documented normalized form.",
           ],
         ],
       ],
@@ -269,9 +263,8 @@ const SUBJECTS = [
   },
 ];
 
-function claimDocument(title, kind, sections) {
-  const label = kind === "invariants" ? "Invariants" : "Scenarios";
-  return `# ${title} ${label}\n\n${sections
+function claimDocument(title, sections) {
+  return `# ${title}\n\n${sections
     .map(
       ([sectionTitle, claims], sectionIndex) =>
         `## §${sectionIndex + 1} ${sectionTitle}\n\n${claims
@@ -309,7 +302,7 @@ export async function writeMockRepository() {
       const claimPath = path.join(root, `${subject.path}.${kind}.md`);
       const proofPath = path.join(root, `${subject.path}.${kind}.test.ts`);
       await mkdir(path.dirname(claimPath), { recursive: true });
-      await writeFile(claimPath, claimDocument(subject.title, kind, sections));
+      await writeFile(claimPath, claimDocument(subject.title, sections));
       await writeFile(proofPath, proofFile(sections));
     }
   }

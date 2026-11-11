@@ -16,23 +16,18 @@ import { fileURLToPath } from 'node:url';
 
 const SKILL_FILES = [
   '.agents/skills/semantic-claims/SKILL.md',
-  '.agents/skills/semantic-claims/claim.md',
-  '.agents/skills/semantic-claims/implement.md',
-  '.agents/skills/semantic-claims/prove.md',
+  '.agents/skills/semantic-claims/migrations/0.2.0.md',
+  '.agents/skills/semantic-claims/references/AMBIGUITY.md',
   '.agents/skills/semantic-claims/references/EXAMPLES.md',
-  '.agents/skills/semantic-claims/references/FAQ.md',
   '.agents/skills/semantic-claims/references/JAVASCRIPT.md',
-  '.agents/skills/semantic-claims/references/README.md',
-  '.agents/skills/semantic-claims/references/REFERENCE.md',
-  '.agents/skills/semantic-claims/review.md',
 ];
 const EXPECTED_FILES = [
   ...SKILL_FILES,
+  'AMBIGUITY.md',
   'EXAMPLES.md',
   'FAQ.md',
   'JAVASCRIPT.md',
   'LICENSE',
-  'OVERVIEW.md',
   'README.md',
   'REFERENCE.md',
   'assets/semantic-explorer.png',
@@ -270,13 +265,13 @@ async function exerciseInstalledChecker(fixtureRoot, environment) {
 `;
   await writeFile(
     path.join(fixtureRoot, 'smoke.invariants.md'),
-    `# Smoke Invariants
+    `# Checker
 
 ## §1 Smoke validation
 
 ### §1.1 The installed checker validates a matching proof
 
-The matching static proof title provides structural coverage.
+The checker SHALL accept the matching static proof title.
 `,
   );
   await writeFile(proofPath, validProof);

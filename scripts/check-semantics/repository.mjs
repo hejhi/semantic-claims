@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { parseClaimDocument, parseProof } from './parse.mjs';
 import { openTypeScriptSources, ts } from './typescript.mjs';
-import { validatePair } from './validate.mjs';
+import { statementErrors, validatePair } from './validate.mjs';
 
 export const KIND_CONFIG = {
   invariants: {
@@ -139,6 +139,23 @@ export async function loadRepository(
             `${relative(claimDocumentPath)}: ${config.claimSingular} claim documents must declare § ids, with at least one section heading of the form "## §N ..." and one ${config.claimSingular} heading of the form "### §N.M ...".`,
           );
           continue;
+        }
+        for (const claim of claimDocument.claims) {
+          for (const error of statementErrors(
+            claim.statement,
+            config.kind,
+            claimDocument.documentTitle,
+          )) {
+            errors.push(
+              `${relative(claimDocumentPath)}: ${config.claimSingular} §${claim.id} statement ${error}.`,
+            );
+          }
+        }
+        if (claimDocument.backtickLines.length > 0) {
+          const lines = claimDocument.backtickLines;
+          errors.push(
+            `${relative(claimDocumentPath)}: ${lines.length === 1 ? 'line' : 'lines'} ${lines.join(', ')} must not contain a backtick.`,
+          );
         }
 
         const expectedProofPaths = proofPathsFor(claimDocumentPath);

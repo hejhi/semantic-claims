@@ -1,57 +1,52 @@
 #!/usr/bin/env bun
-// Builds generated skill references from the method documents.
-import {
-  copyFile,
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from 'node:fs/promises';
+// Builds the generated parts of the semantic-claims skill from the method documents.
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const SOURCE = '.agents/skills/semantic-claims';
-const SEMANTIC_CLAIMS_DOCS = [
-  'README.md',
-  'REFERENCE.md',
-  'FAQ.md',
-  'EXAMPLES.md',
-  'JAVASCRIPT.md',
-];
-const semanticClaimsReferences = path.join(SOURCE, 'references');
-const REPOSITORY_URL = 'https://github.com/hejhi/semantic-claims';
-const REPOSITORY_DIRECTORIES = new Set([
-  '.agents/skills',
-  'scripts',
+const SKILL = '.agents/skills/semantic-claims';
+const SKILL_FILE = path.join(SKILL, 'SKILL.md');
+const MARKER =
+  '<!-- Generated from REFERENCE.md by "bun run sync:skills". Edit REFERENCE.md instead of the text below. -->';
+const REFERENCES = ['AMBIGUITY.md', 'EXAMPLES.md', 'JAVASCRIPT.md'];
+const REPOSITORY_URL = 'https://github.com/hejhi/semantic-claims/blob/main';
+
+// The skill-relative path of each method document that the skill contains.
+const LOCATIONS = new Map([
+  ['REFERENCE.md', 'SKILL.md'],
+  ...REFERENCES.map((document) => [document, `references/${document}`]),
 ]);
 
-function makeReadmePortable(markdown) {
-  const withPortableImages = markdown.replace(
-    /!\[([^\]]*)\]\(\.\/([^)]+)\)/g,
-    (_, alt, target) =>
-      `![${alt}](https://raw.githubusercontent.com/hejhi/semantic-claims/main/${target})`,
-  );
-
-  return withPortableImages.replace(
-    /\[([^\]]+)\]\(\.\/([^)]+)\)/g,
-    (_, label, target) => {
-      const targetPath = target.split(/[?#]/, 1)[0];
-      const view = REPOSITORY_DIRECTORIES.has(targetPath) ? 'tree' : 'blob';
-      return `[${label}](${REPOSITORY_URL}/${view}/main/${target})`;
-    },
-  );
+// Rewrites each `./` link target for the generated skill file at the skill-relative path `file`.
+function convertLinks(markdown, file) {
+  return markdown.replace(/\]\(\.\/([^)#]*)([^)]*)\)/g, (_, target, anchor) => {
+    const location = LOCATIONS.get(target);
+    if (!location) {
+      return `](${REPOSITORY_URL}/${target}${anchor})`;
+    }
+    if (location === file && anchor) {
+      return `](${anchor})`;
+    }
+    return `](${path.posix.relative(path.posix.dirname(file), location)}${anchor})`;
+  });
 }
 
-await rm(semanticClaimsReferences, { force: true, recursive: true });
-await mkdir(semanticClaimsReferences, { recursive: true });
-for (const document of SEMANTIC_CLAIMS_DOCS) {
-  const target = path.join(semanticClaimsReferences, document);
-  if (document === 'README.md') {
-    const markdown = await readFile(document, 'utf8');
-    await writeFile(target, makeReadmePortable(markdown));
-  } else {
-    await copyFile(document, target);
-  }
+const skill = await readFile(SKILL_FILE, 'utf8');
+const end = skill.indexOf(MARKER);
+if (end === -1) {
+  throw new Error(`${SKILL_FILE} must contain the line ${MARKER}`);
 }
-console.log(
-  `generated ${SEMANTIC_CLAIMS_DOCS.length} semantic-claims references`,
+const reference = (await readFile('REFERENCE.md', 'utf8')).replace(/^# .*\n+/, '');
+await writeFile(
+  SKILL_FILE,
+  `${skill.slice(0, end + MARKER.length)}\n\n${convertLinks(reference, 'SKILL.md')}`,
 );
+
+await rm(path.join(SKILL, 'references'), { force: true, recursive: true });
+await mkdir(path.join(SKILL, 'references'));
+for (const document of REFERENCES) {
+  await writeFile(
+    path.join(SKILL, 'references', document),
+    convertLinks(await readFile(document, 'utf8'), `references/${document}`),
+  );
+}
+console.log(`generated ${SKILL_FILE} and ${REFERENCES.length} references`);

@@ -49,6 +49,79 @@ function parentIdOf(claimId) {
   return claimId.split('.')[0];
 }
 
+function maskCode(text) {
+  return text.replace(/(`+)[\s\S]*?\1/g, (span) => span.replace(/[^`]/g, 'x'));
+}
+
+function escapeRegExp(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const KEYWORD = '\\b(?:WHERE|WHILE|WHEN|IF|THEN|SHALL)\\b';
+const SLOT = `(?:(?!${KEYWORD}).)+?`;
+const TEMPLATE =
+  '[WHERE <creation value>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>';
+
+// The statement rules in JAVASCRIPT.md#claim-document-structure.
+export function statementErrors(statement, kind, system) {
+  const raw = statement.replace(/\s+/g, ' ').trim();
+  // Masking keeps offsets, so a position in `text` is the same position in `raw`.
+  let text = maskCode(raw);
+  if (text === '') {
+    return ['must not be empty'];
+  }
+
+  const errors = [];
+  const shall = text.search(/\bSHALL\b/);
+  const name = system?.replace(/\s+/g, ' ').trim();
+  let named = false;
+  if (shall === -1) {
+    errors.push('must contain "SHALL"');
+  } else if (!name) {
+    errors.push(
+      'must name its system before "SHALL", but its claim document has no "#" heading',
+    );
+  } else if (
+    new RegExp(`(^|, |THEN )the ${escapeRegExp(name)} $`, 'i').test(
+      raw.slice(0, shall),
+    )
+  ) {
+    // The keyword rules below apply outside the system name.
+    const start = shall - name.length - 1;
+    text = text.slice(0, start) + 'x'.repeat(name.length) + text.slice(shall - 1);
+    named = true;
+  } else {
+    errors.push(`must name its system as "the ${system}" before "SHALL"`);
+  }
+  if (
+    [...text.matchAll(/\b(?:where|while|when(?:ever)?|if|then|shall)\b/gi)].some(
+      ([word]) => word !== word.toUpperCase() || word === 'WHENEVER',
+    )
+  ) {
+    errors.push(
+      'must not contain "where", "while", "when", "whenever", "if", "then", or "shall" except as an uppercase keyword',
+    );
+  }
+  // A hyphenated compound such as "read-only" has a fixed placement.
+  if (/(?<![\w-])only(?![\w-])/i.test(text)) {
+    errors.push('must use "exactly" or "each" in place of "only"');
+  }
+  if (!named) {
+    return errors;
+  }
+  const match = new RegExp(
+    `^(?:WHERE ${SLOT}, )?(?:WHILE ${SLOT}, )?(?:(WHEN) ${SLOT}, |(IF) ${SLOT}, THEN )?[Tt]he x+ SHALL ${SLOT}$`,
+  ).exec(text);
+  if (!match) {
+    errors.push(`must follow "${TEMPLATE}"`);
+  } else if (kind === 'invariant' && (match[1] || match[2])) {
+    errors.push('must not contain "WHEN" or "IF"');
+  } else if (kind === 'scenario' && !match[1] && !match[2]) {
+    errors.push('must contain "WHEN <trigger>," or "IF <trigger>, THEN"');
+  }
+  return errors;
+}
+
 export function validatePair({
   claimDocument,
   claimDocumentPath,
@@ -114,7 +187,6 @@ export function validatePair({
       );
     }
   }
-
   for (const section of proof.sections) {
     if (section.id && section.title === '') {
       errors.push(

@@ -32,6 +32,7 @@ function parseTitle(title, idPattern, titlePattern) {
 export function parseClaimDocument(source) {
   const sections = [];
   const claims = [];
+  const backtickLines = [];
   let documentTitle = null;
   let fence = null;
   let pendingClaim = null;
@@ -49,6 +50,9 @@ export function parseClaimDocument(source) {
   }
 
   for (const [index, line] of source.split(/\r?\n/).entries()) {
+    if (line.includes('`')) {
+      backtickLines.push(index + 1);
+    }
     const fenceMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
     if (fenceMatch) {
       const delimiter = fenceMatch[1];
@@ -110,7 +114,7 @@ export function parseClaimDocument(source) {
   }
 
   finishClaim();
-  return { claims, documentTitle, sections };
+  return { backtickLines, claims, documentTitle, sections };
 }
 
 function getCallRootName(expression, ts) {

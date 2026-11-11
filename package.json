@@ -19,10 +19,10 @@
   },
   "files": [
     ".agents/skills/semantic-claims",
+    "AMBIGUITY.md",
     "EXAMPLES.md",
     "FAQ.md",
     "JAVASCRIPT.md",
-    "OVERVIEW.md",
     "REFERENCE.md",
     "assets/semantic-explorer.png",
     "scripts/check-semantics.mjs",

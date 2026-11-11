@@ -1,123 +1,180 @@
 # Semantic Claims Reference
 
-For a quick and accessible introduction, description, and example, start with the [README](./README.md).
+_For an introduction and example, start with [README](./README.md). These are conventions for writing claims and proofs. The checker requires this document format as well as the [JavaScript and TypeScript proof conventions](./JAVASCRIPT.md)._
 
-The method requires stating intended observable behavior before writing proofs and implementation, linking each claim to executable tests, and reviewing the three together. The Markdown headings and filenames below are conventions for recording and locating those artifacts. The supplied checker requires this document format and the [JavaScript and TypeScript proof conventions](./JAVASCRIPT.md).
+Semantic Claims provides a way to specify, prove, and preserve the **public semantics** of any given system.
 
-## Semantics
+## Definitions
 
-Semantics are the intended observable behaviors of whatever is being built.
+Semantic Claims defines:
 
-## Subjects
+- **Public semantics** as the intentional, observable characteristics of a given system
+- **Intentional** as characteristics that are not implied or side-effects
+- **Observable** as characteristics that can be proven by a test exercising only the public interface of the system
+- **System** as any coherent encapsulation of code with public semantics that _warrant specification_
 
-A subject represents a coherent and complete set of intentional observable behavior—from a system or protocol to a component or shared helper. A subject name should remain valid through implementation changes as long as the intended behavior stays the same.
+As Semantic Claims is _only_ interested in public semantics, when the word "semantics" is used here and elsewhere, it's referring specifically to public semantics as described above.
 
-For example, consider this requirement:
+## Purpose
 
-> When two searches overlap, completing the older request must not replace the results for the newer search.
+The purpose of applying Semantic Claims to a system is to:
 
-The complete observable outcome is which results remain published, so **Search results** is the subject. **Search request** is too narrow because the outcome depends on more than one request, while **Search** includes behavior beyond result publication.
+- protect meaningful and intentional characteristics over time from accidental drift through code changes, refactors, and cleanups
+- encourage an intentional, semantics-first approach to design, testing, implementation, and refactors
+- provide accurate, valuable context on intentionality for maintainers over time
+- make semantic changes conspicuous during code reviews
 
 ## Claims
 
-A claim states one intended observable behavior of a subject's semantics in plain language. Claims are grouped in claim sets, within a claim document, which as a whole form a semantic contract.
+Claims are organized in structured Markdown documents called **claim documents**, which are detailed semantic specifications for a given system.
 
-Claims should be written using familiar terminology already established within the scope of a subject. They should include when the behavior applies, and what an observer can expect to happen.
+### Claims specify meaning
 
-Note: Access to private implementation details does not by itself make a behavior observable, or intended!
+Claims specify what a system does without specifying solutions or implementation mechanics. They are semantic requirements from which anyone could plausibly reconstruct the system in a myriad of ways, while proving it behaves as specified.
+
+Red flags of implementation mechanics:
+
+- backticks, including literal code values such as `true`, `null`, or `0`
+- referencing or specifying data structures, methods, or properties
+- keywords like "returns", "calls", "callback", "arguments", "passes", "invokes", or anything describing functional orchestration
+
+A claim should be specified in plain language without code references at all. For instance, instead of specifying "WHILE `isOpen()` returns `true`", specify "WHILE open".
+
+If a claim cannot describe a system without referencing or prescribing implementation, then it may be that the system's characteristics do not have enough clear meaning to warrant a claim. [See here](#choosing-when-and-how-to-write-semantic-claims) on how to decide when to apply Semantic Claims.
 
 ### Claim kinds
 
-Every claim is either an **invariant** or a **scenario**:
+A claim is either an **invariant** or a **scenario**, with each getting their own respective document. Scenarios cannot be mixed into invariant documents or vice-versa.
 
-- An invariant describes something that must be true whenever its stated conditions apply.
-- A scenario describes what must happen when events occur in a particular order.
+Every claim in a document is a single sentence following the EARS pattern (Easy Approach to Requirements Syntax). The EARS keywords `WHERE`, `WHILE`, `WHEN`, `IF`, `THEN`, and `SHALL` are written in uppercase, in this order:
 
-If changing the order of the relevant events could change the expected result, it's a scenario—the order of setup steps in a test doesn't make it one. The order has to matter to the behavior itself. Otherwise, it's an invariant.
+`[WHERE <creation value>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>.`
 
-Invariants are written as direct statements. Scenarios can be structured as Given/When/Then to make the specification easier to follow, though it's not a requirement.
+Rules for Semantic Claims:
+- Each bracketed clause is optional
+- Each keyword may only appear a single time per claim (unless it is part of the system name itself).
+- Keywords and conditional logic must never appear in a claim's prose, such as "...shows the fallback content **when** the source...".
+- Negative statements in claims are not permitted after a `SHALL`. Systems can "not do" an unlimited number of behaviors, and Semantic Claims specifies positive characteristics; claims should be phrased positively.
+- Multiple `SHALL` clauses is not permitted.
+- Each claim has one response. Two responses that a test can verify separately are two claims, while responses that form one outcome, such as two outputs in a required order, are one response.
+- Avoid words where placement can cause ambiguity, like "only", preferring words like "exactly" or "each" (read [AMBIGUITY.md](./AMBIGUITY.md)).
 
-Invariant and scenario claims should be separate documents. A subject can have both claim kinds:
+An **invariant** claim describes a single, observable characteristic that must always be true, or always true under a specified condition:
 
-```text
-name.invariants.md
-name.scenarios.md
-```
+- `The <system name> SHALL <system response>.`
+- `WHILE <state>, the <system name> SHALL <system response>.`
+- `WHERE <creation value>, the <system name> SHALL <system response>.`
+- `WHERE <creation value>, WHILE <state>, the <system name> SHALL <system response>.`
 
-Regardless of kind, claim documents should be colocated with subject proofs and implementation.
+Rules:
+
+An invariant claim begins with `The`, `WHILE`, or `WHERE`. It can _never_ include `WHEN` or `Whenever`.
+
+An invariant can never refer to a prior or future state, which means it cannot state when an event happened, or specify when the system should run, react, or respond. This means invariants do not work for events, such as requests, creation, or notifications the system sends. Invariants also can't include `IF` for the same reason, as `IF` can only be used in the form of `IF ... THEN`, where `IF` introduces a trigger, and `THEN` introduces the response.
+
+A **scenario** claim describes the triggering of an observable characteristic:
+
+- `WHEN <trigger>, the <system name> SHALL <system response>.`
+- `IF <trigger>, THEN the <system name> SHALL <system response>.`, which may replace `WHEN` for a failure or another unwanted event.
+- `WHILE <state>, WHEN <trigger>, the <system name> SHALL <system response>.`
+- `WHERE <creation value>, ` may begin any of these.
+
+A scenario _must_ contain a `<trigger>`, introduced by `WHEN` or `IF`. Scenarios beginning with `WHERE` or `WHILE` are acceptable, as long as a `WHEN` or `IF` clause follows them.
+
+A `<trigger>` may be an event, such as when the system runs, a request to the system, a failure (with `IF`), or a system sending a notification. Scenarios specify _when_ the system should run, whereas invariants deal only with _present (or constant) state_.
+
+An example of a `<trigger>` might be `WHEN a paid order is marked for shipment`. Another state condition outside of the `<trigger>` can be captured in a `WHILE` clause, for example `WHILE the shop is closed`. `WHILE` conditions in a scenario are evaluated **while** the trigger occurs (as in, before the system's response), thus the ordering of `WHILE`, `WHEN`, and `SHALL`, where `SHALL` describes the system response.
+
+In every pattern, `<system name>` is the _exact name_ in the claim document's `#` heading (ignoring capitalization).
 
 ### Cross-cutting claims
 
-Some behavior depends on several subjects working together. When the behavior can't be wholly assigned to a single subject, the interaction itself is the subject of a **cross-cutting claim**.
+A **cross-cutting claim** cannot describe only a single system; the system of a cross-cutting claim is the interaction among multiple systems.
 
-Cross-cutting claim documents start with `--`:
+A claim document's filename starts with `--` if its claims are cross-cutting. A cross-cutting claim document is stored in the lowest common ancestor directory of the files of every system in the interaction. For instance:
 
 ```text
---name.invariants.md
---name.scenarios.md
+search/
+├── --filtered-search.invariants.md
+├── --filtered-search.invariants.test.ts
+├── search-filter.ts
+├── search-results.invariants.md
+├── search-results.invariants.test.ts
+└── search-results.ts
 ```
-
-The document is placed in the closest directory that contains files for every subject involved in the interaction, and should include only behavior that belongs to the interaction. Each local subject's own behavior belongs in its local claim documents, and shouldn't be copied or summarized in the cross-cutting document.
-
-### Deciding whether a behavior needs a claim
-
-The first step is making sure the subject's behavior is clear, meaningful, and observable. A claim should be written when changing or removing the behavior would affect an intended outcome an observer relies on. If an existing claim already requires the same result under the same conditions, it doesn't need another one.
-
-Specify every warranted behavior in scope, avoiding redundant claims. More than one grouping may be reasonable; choose one readers can follow. There is no requirement to find the fewest possible claims.
 
 ### Document structure
 
-The Markdown format uses identifiers and headings so readers and tools can locate claims and their proofs consistently. A claim document has four parts:
+A claim document has four parts:
 
-1. An `#` heading with the subject's name in ordinary language.
-2. An optional introduction that clarifies what the subject includes.
-3. One or more `## §N Title` sections. We call each section a claim set, and it groups related claims.
-4. One or more `### §N.M Title` claims. The text under each heading describes the required behavior.
+1. An `#` heading with the system's name.
+2. An optional introduction defining terminology used in claims.
+3. One or more `## §N Title` sections.
+4. One or more `### §N.M Title` claims. The text under each heading is the claim's statement.
 
-Each claim includes an identifier, title, and statement. The title should be short and declarative, with conditions and results in a statement beneath it.
+Neither the introduction nor a section heading should contain statements that belong in claims. If a claim uses a term with a meaning specific to the system, it should be defined in the introduction.
 
-Introductions and claim-set headings provide context and organization only.
+Every section and claim identifier is unique within its document. The first number in a claim identifier is the number of its section.
 
-Every section and claim identifier has to be unique within its document. The first number in a claim identifier refers to its section. For example, claim `§2.3` belongs to section `§2`.
+Identifiers link claims, proofs, and references to each other. They _do not_ impose priority, order, or dependencies. They may contain gaps or appear out of numeric order.
 
-Identifiers provide stable links among claims, proofs, and references—they don't correlate with priority, execution order, or dependencies, so it's fine for them to contain gaps or appear out of numeric order. Optimize for readability and clarity rather than ordering by numeric identifiers.
-
-This way, a new claim can take any unused identifier in its section, and then be put where it reads naturally. If an identifier or title needs to change, every proof and reference that uses it should be updated too so the link doesn't become stale.
+As identifiers provide linkage, a change to an identifier or title requires the same change in every proof and reference that is linked to it.
 
 ## Proofs
 
-Each claim document pairs with one proof file in the same directory. Every claim is verified by one or more executable tests in that file that form the claim’s proof. Each test must link unambiguously to the claim, though languages and test frameworks may represent that link differently.
+Claims must be **provable** through one or more tests that exercise _only_ the system's public API. These proofs are tests colocated with the claim document they prove.
 
-For JavaScript and TypeScript, the filename and test structure conventions are detailed in [JAVASCRIPT.md](./JAVASCRIPT.md). This repo's checker validates the links, while project test runners are responsible for executing proofs.
+Every claim document has a paired proof file in the same directory. Inside the proof file, every claim proof is a set of executable tests that are linked to the claim. Languages and test frameworks may represent that link differently, provided each test links to exactly one claim.
 
-## Resolving disagreements
+A passing claim proof _must_ fully and non-ambiguously prove the claim it references using the system's public API.
 
-If the intended behavior has changed, the claim should be updated first. If it hasn't, the claim should be left alone and the proof or implementation fixed.
+## Choosing when and how to write Semantic Claims
 
-## Methodology
+Semantic Claims describes [meaning, not mechanism](#claims-specify-meaning). That should guide every decision, including:
 
-Begin with intended behavior established through requirements, specifications, or designs.
+- when Semantic Claims should be applied to a system
+- what characteristics of the system warrant claims
+- what EARS keywords and language should be used to write a claim
 
-When adding or changing intended behavior:
+Apply Semantic Claims to systems with _observable characteristics that warrant claims_. A claim is _warranted_ when it is:
 
-1. start with the subject of the new or changed behavior
-2. read any existing claims for the subject and any cross-cutting claims that apply
-3. decide the intended observable behavior and whether it needs a claim
-4. write each claim as an invariant or scenario
-5. write executable proofs from those claims. If the behavior is missing or wrong, the proofs must fail because of that behavior, not because the test setup is broken
-6. write or change the implementation until the proofs pass
-7. run the structural claim checks, executable proofs, and other relevant project checks
-8. review the claims, proofs, and implementation together
+1. intentional: it should be a _deliberate_ part of a system's semantics, not implied or side-effects
+2. meaningful: it can be specified _without needing to specify mechanism or implementation_
+3. provable: it should be provable using the system's _publicly available interface_
 
-While writing a proof, ambiguity, overlap, or behavior might surface that can't be tested as written; in that case, the claim and proof should be revised together before continuing with the implementation. If the intended behavior is still unclear, stop and resolve it first.
+In a perfect world, Semantic Claims should be warranted for all observable characteristics of a system. In reality, and particularly when applying Semantic Claims to existing implementations, systems may have observable characteristics that exist solely for implementation purposes; such characteristics do not warrant claims. Either way, going through the exercise of Semantic Claims can be valuable in uncovering ambiguities, implied characteristics, and other issues with encapsulation or responsibilities.
+
+## Troubleshooting
+
+Claims are only as good as their proofs, and vice-versa. Weak claims and proofs are ambiguous, unclear, or contradictory (within themselves or each other).
+
+### Weak semantic claims
+
+Claims should never include or reference [implementation details](#claims-specify-meaning). If claims are updated frequently, it can indicate leaks of implementation into the claims. Claims should be able to withstand refactors if system behavior does not change.
+
+While unintentionally changing system behavior _should_ fail a proof, it is always important to concretely understand _why_ a proof failed. It might be a straightforward violation of the proof. It also could be that the claim ambiguous, and the change is actually a valid interpretation of what it states. Or, maybe it is a proof issue, where the proof is not specific enough in what it proves. In other words, always understand the root cause of a proof failure before deciding which action is the correct one to take.
+
+More nefarious, however, is proofs _not_ failing when they should, or the description of a proof not matching what it actually tests, which can allow implementations to drift from claims without notice.
+
+### Other issues
+
+If implementation updates are consistently driving claim or proof changes, while it may be an indicator of weak claims or proofs, it may also indicate:
+
+- **workflow issues**: the implementation was approached without reading and understanding the claims first, or there was an _intentional_ change to existing semantics in the wrong order, as [claims should always be updated first, proofs second, and implementation last](#adjusting-semantics)
+- **implementation issues**: the claims are correct, but not provable without relying on internal details
+
+## Adjusting semantics
+
+Adjustments to a system's semantics should always be done with care and intention. When it has been decided that semantics must be updated, the correct order to follow is:
+
+1. adjust claims _before_ touching any code
+2. adjust the proofs accordingly; they should _fail_ if a core semantic has truly changed
+3. adjust the implementation to make the proof pass
+
+This is TDD, with the difference that adjustments to claims come first to drive the proof tests. Regardless, the implementation comes last, and should flip the proof from red to green.
 
 ### Existing software
 
-Claims can be added to existing software incrementally, starting with the subject or change at hand. Priority should be given to behavior where a mistake would be costly or difficult to recover from, such as:
+Semantic claims can be added to existing software, though it should be done incrementally. First, start by mapping out the systems where claims are the most obvious, then start to write claim docs, followed by proofs. This will help to delineate between intentional and unintentional behaviors and states that already exist in the implementation.
 
-- public interfaces, external protocols, persisted data, and compatibility;
-- authorization, accounting, and irreversible effects;
-- retries, cancellation, concurrency, and lifecycle behavior;
-- interactions and user or operator workflows involved in previous incidents.
-
-Requirements, protocols, user documentation, incident reports, code, tests, and firsthand product or domain knowledge can be used to work out intended behavior. Code and tests show what happens today, but don't establish by themselves what should happen. Any source might be incomplete, stale, or wrong. When sources conflict, the intended behavior should be decided before writing a claim. The current behavior might be intentional, accidental, temporary, wrong, or just an implementation detail; either way, the same workflow still applies: the claim should always be written before a new proof, even when that proof will pass immediately.
+Requirements, protocols, user documentation, incident reports, and firsthand product or domain knowledge should be used as evidence of intended behavior. Those should be reconciled with code and tests, which should be treated skeptically as a record of _current_ behavior, but not necessarily _intentional_.

@@ -8,52 +8,53 @@ import {
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const FIXTURE_FILES = {
-  'src/orders.invariants.md': `# Order Invariants
+  'src/orders.invariants.md': `# Order List
 
 ## §1 Publication
 
 ### §1.1 Completed orders remain visible
 
-The completed order remains visible while its receipt is prepared.
+The order list SHALL include every completed order and its receipt.
 `,
   'src/orders.invariants.test.ts': `describe('§1 — Publication', () => {
   test('§1.1 — Completed orders remain visible', () => {});
   test('§1.1 — Completed orders remain visible', () => {});
 });
 `,
-  'src/orders.scenarios.md': `# Order Scenarios
+  'src/orders.scenarios.md': `# Store
 
 ## §1 Cancellation
 
 ### §1.1 Cancellation precedes reimbursement
 
-After an order is cancelled, reimbursement begins before its receipt is archived.
+WHEN an order is cancelled, the store SHALL begin reimbursement before it archives the receipt.
 `,
   'src/orders.scenarios.test.mjs': `describe('§1 — Cancellation', () => {
   test('§1.1 — Cancellation precedes reimbursement', () => {});
 });
 `,
-  'src/--checkout.scenarios.md': `# Checkout Seam Scenarios
+  'src/--checkout.scenarios.md': `# Order Service
 
 ## §1 Submission
 
 ### §1.7 Accepted payment reaches order creation
 
-An accepted payment reaches order creation exactly once. Rare semantic phrase.
+WHEN a payment is accepted, the order service SHALL create exactly one order. Rare semantic phrase.
 `,
   'src/--checkout.scenarios.test.js': `describe('§1 — Submission', () => {
   test('§1.7 — Accepted payment reaches order creation', () => {});
 });
 `,
-  'src/temp/returns.invariants.md': `# Return Invariants
+  'src/temp/returns.invariants.md': `# Return List
 
 ## §1 Visibility
 
 ### §1.1 Accepted returns remain visible
 
-An accepted return remains visible until its resolution is recorded.
+WHILE a return is accepted, the return list SHALL include the return.
 `,
   'src/temp/returns.invariants.test.mjs': `describe('§1 — Visibility', () => {
   test('§1.1 — Accepted returns remain visible', () => {});
@@ -108,7 +109,7 @@ export async function repositorySnapshot(
   return snapshot;
 }
 
-export async function readFirstLine(
+async function readFirstLine(
   stream: ReadableStream<Uint8Array>,
 ): Promise<string> {
   const reader = stream.getReader();
@@ -122,4 +123,25 @@ export async function readFirstLine(
   }
   await reader.cancel();
   return output.split(/\r?\n/, 1)[0] ?? '';
+}
+
+const CLI = fileURLToPath(new URL('../check-semantics.mjs', import.meta.url));
+
+export async function withExplore(
+  check: (firstLine: string) => Promise<void>,
+) {
+  await withFixture(async (root) => {
+    const child = Bun.spawn({
+      cmd: [process.execPath, CLI, 'explore'],
+      cwd: root,
+      stderr: 'pipe',
+      stdout: 'pipe',
+    });
+    try {
+      await check(await readFirstLine(child.stdout));
+    } finally {
+      child.kill();
+      await child.exited;
+    }
+  });
 }

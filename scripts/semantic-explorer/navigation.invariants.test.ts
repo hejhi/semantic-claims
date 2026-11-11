@@ -1,10 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { buildExplorerModel } from './model.mjs';
 import { createExplorerServer } from './server.mjs';
 import { withFixture } from './test-fixture';
 
 describe('§1 — Exploration lenses', () => {
-  test('§1.1 — Users can explore semantics by subject, claim kind, cross-cutting status, and text', async () => {
+  test('§1.1 — The start page lists every subject', async () => {
     await withFixture(async (root) => {
       const explorer = await createExplorerServer({ root });
       try {
@@ -13,7 +12,17 @@ describe('§1 — Exploration lenses', () => {
         );
         expect(subjects).toContain('data-subject-id="src/orders"');
         expect(subjects).toContain('data-subject-id="src/--checkout"');
+        expect(subjects).toContain('data-subject-id="src/temp/returns"');
+      } finally {
+        await explorer.close();
+      }
+    });
+  });
 
+  test('§1.2 — Selected filters show exactly the matching claims', async () => {
+    await withFixture(async (root) => {
+      const explorer = await createExplorerServer({ root });
+      try {
         const subject = await fetch(
           `${explorer.url}?subject=${encodeURIComponent('src/orders')}`,
         ).then((response) => response.text());
@@ -56,7 +65,6 @@ describe('§1 — Exploration lenses', () => {
         expect(local).not.toContain(
           'data-claim-title="Accepted payment reaches order creation"',
         );
-        expect(subjects).toContain('href="/?ownership=local"');
 
         const search = await fetch(
           `${explorer.url}?q=${encodeURIComponent('rare semantic phrase')}`,
@@ -79,7 +87,7 @@ describe('§1 — Exploration lenses', () => {
         );
 
         const identifierMatch = await fetch(
-          `${explorer.url}?q=${encodeURIComponent('1.7')}`,
+          `${explorer.url}?q=${encodeURIComponent(' 1.7 ')}`,
         ).then((response) => response.text());
         expect(identifierMatch).toContain(
           'data-claim-title="Accepted payment reaches order creation"',
@@ -107,25 +115,25 @@ describe('§1 — Exploration lenses', () => {
         expect(subjectSearch).not.toContain(
           'data-claim-title="Accepted payment reaches order creation"',
         );
-        expect(subjectSearch).toContain(
-          'name="subject" value="src/orders"',
-        );
-        expect(subjectSearch).toContain(
-          'data-clear-href="/?subject=src%2Forders&amp;view=claims"',
-        );
+      } finally {
+        await explorer.close();
+      }
+    });
+  });
 
-        const model = await buildExplorerModel(root);
-        const selectedClaim = model.claims.find(
-          ({ title }) => title === 'Cancellation precedes reimbursement',
-        );
+  test('§1.3 — An open claim shows its statement, proofs, and source', async () => {
+    await withFixture(async (root) => {
+      const explorer = await createExplorerServer({ root });
+      try {
         const detail = await fetch(
-          `${explorer.url}?claim=${encodeURIComponent(selectedClaim!.key)}`,
+          `${explorer.url}?claim=${encodeURIComponent('src/orders:invariant:1.1')}`,
         ).then((response) => response.text());
         expect(detail).toContain(
-          'After an order is cancelled, reimbursement begins before its receipt is archived.',
+          'The order list SHALL include every completed order and its receipt.',
         );
-        expect(detail).toContain('src/orders.scenarios.md:5');
-        expect(detail).toContain('src/orders.scenarios.test.mjs:2');
+        expect(detail).toContain('src/orders.invariants.md:5');
+        expect(detail).toContain('src/orders.invariants.test.ts:2');
+        expect(detail).toContain('src/orders.invariants.test.ts:3');
       } finally {
         await explorer.close();
       }
