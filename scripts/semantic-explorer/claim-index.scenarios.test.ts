@@ -21,7 +21,7 @@ describe('§1 — Claims and proofs', () => {
       expect(invariant).toMatchObject({
         id: '1.1',
         kind: 'invariant',
-        seam: false,
+        crossCutting: false,
         subjectId: 'src/orders',
         title: 'Completed orders remain visible',
         statement:
@@ -32,8 +32,8 @@ describe('§1 — Claims and proofs', () => {
         },
       });
 
-      const seam = model.claims.find(({ seam }) => seam);
-      expect(seam).toMatchObject({
+      const crossCutting = model.claims.find(({ crossCutting }) => crossCutting);
+      expect(crossCutting).toMatchObject({
         kind: 'scenario',
         subjectId: 'src/--checkout',
         title: 'Accepted payment reaches order creation',

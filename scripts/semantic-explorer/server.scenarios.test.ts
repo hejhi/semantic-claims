@@ -9,7 +9,7 @@ describe('§1 — Local read-only operation', () => {
       const explorer = await createExplorerServer({ root });
       try {
         await fetch(explorer.url).then((response) => response.text());
-        await fetch(`${explorer.url}?ownership=seam`).then((response) =>
+        await fetch(`${explorer.url}?scope=cross-cutting`).then((response) =>
           response.text(),
         );
         await fetch(

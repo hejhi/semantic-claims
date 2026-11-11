@@ -29,8 +29,8 @@ function sourceHref(location) {
 function claimMatches(claim, subject, filters) {
   if (filters.subject && claim.subjectId !== filters.subject) return false;
   if (filters.kind && claim.kind !== filters.kind) return false;
-  if (filters.ownership === "seam" && !claim.seam) return false;
-  if (filters.ownership === "local" && claim.seam) return false;
+  if (filters.scope === "cross-cutting" && !claim.crossCutting) return false;
+  if (filters.scope === "local" && claim.crossCutting) return false;
   if (!filters.query) return true;
 
   const searchable = [subject.name, subject.id, claim.id, claim.title, claim.statement]
@@ -41,7 +41,7 @@ function claimMatches(claim, subject, filters) {
 
 function claimBadge(claim) {
   return `<span class="badge badge-${claim.kind}">${escapeHtml(claim.kind)}</span>${
-    claim.seam ? '<span class="badge badge-seam">cross-cutting</span>' : ""
+    claim.crossCutting ? '<span class="badge badge-cross-cutting">cross-cutting</span>' : ""
   }`;
 }
 
@@ -76,7 +76,7 @@ function renderClaimCard(claim, subject, filters) {
   const parameters = {
     claim: claim.key,
     kind: filters.kind,
-    ownership: filters.ownership,
+    scope: filters.scope,
     q: filters.rawQuery,
     subject: filters.subject,
   };
@@ -131,7 +131,7 @@ function renderSubjectCards(subjects, claimsByKey) {
         const invariantCount = claims.filter(({ kind }) => kind === "invariant").length;
         const scenarioCount = claims.length - invariantCount;
         return `<a class="subject-row" data-subject-id="${escapeHtml(subject.id)}" href="${escapeHtml(href({ subject: subject.id }))}">
-        <span class="subject-icon">${subject.seam ? "↔" : "§"}</span>
+        <span class="subject-icon">${subject.crossCutting ? "↔" : "§"}</span>
         <span class="subject-copy">
           <span class="subject-title">${escapeHtml(subjectLabel(subject))}</span>
           <span class="subject-path">${escapeHtml(subject.path || "repository root")}</span>
@@ -139,7 +139,7 @@ function renderSubjectCards(subjects, claimsByKey) {
         <span class="subject-counts">
           ${invariantCount > 0 ? `<span><strong>${invariantCount}</strong> invariant${invariantCount === 1 ? "" : "s"}</span>` : ""}
           ${scenarioCount > 0 ? `<span><strong>${scenarioCount}</strong> scenario${scenarioCount === 1 ? "" : "s"}</span>` : ""}
-          ${subject.seam ? '<span class="badge badge-seam">cross-cutting</span>' : ""}
+          ${subject.crossCutting ? '<span class="badge badge-cross-cutting">cross-cutting</span>' : ""}
         </span>
       </a>`;
       })
@@ -151,14 +151,14 @@ function layout({ body, detail = false, model, filters, subtitle, title }) {
   const currentQuery = filters.rawQuery;
   const clearSearchUrl = href({
     kind: filters.kind,
-    ownership: filters.ownership,
+    scope: filters.scope,
     subject: filters.subject,
     view: "claims",
   });
   const invariantCount = model.claims.filter(({ kind }) => kind === "invariant").length;
   const scenarioCount = model.claims.length - invariantCount;
-  const seamCount = model.claims.filter(({ seam }) => seam).length;
-  const localCount = model.claims.length - seamCount;
+  const crossCuttingCount = model.claims.filter(({ crossCutting }) => crossCutting).length;
+  const localCount = model.claims.length - crossCuttingCount;
   const navLink = ({ count, label, parameters, selected }) =>
     `<a class="nav-link${selected ? " active" : ""}" href="${escapeHtml(href(parameters))}"><span>${label}</span><span class="nav-count">${count}</span></a>`;
   return `<!doctype html>
@@ -246,7 +246,7 @@ function layout({ body, detail = false, model, filters, subtitle, title }) {
     .badge { display:inline-block; margin-right:4px; padding:2px 5px; border:1px solid transparent; border-radius:4px; font-size:8px; font-weight:650; letter-spacing:.045em; text-transform:uppercase; }
     .badge-invariant { color:var(--accent); background:var(--accent-soft); }
     .badge-scenario { color:var(--blue); background:var(--blue-soft); }
-    .badge-seam { color:var(--amber); background:var(--amber-soft); }
+    .badge-cross-cutting { color:var(--amber); background:var(--amber-soft); }
     .claim-id { color:#8b8c95; font:600 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace; }
     .source-link { position:relative; z-index:1; color:#8d88bb; font:10px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace; text-decoration-color:#45425e; text-underline-offset:2px; }
     .source-link:hover { color:#b6afff; }
@@ -285,14 +285,14 @@ function layout({ body, detail = false, model, filters, subtitle, title }) {
       <a class="brand" href="/"><span class="mark">§</span><span><strong>Semantic Explorer</strong><span>Claims and proofs</span></span></a>
       <nav>
       <div class="nav-title">Explore</div>
-      ${navLink({ count: model.subjects.length, label: "Subjects", parameters: {}, selected: !filters.claim && filters.view !== "claims" && !filters.kind && !filters.ownership && !filters.subject && !filters.query })}
-      ${navLink({ count: model.claims.length, label: "All claims", parameters: { view: "claims" }, selected: (filters.view === "claims" || filters.claim) && !filters.kind && !filters.ownership })}
+      ${navLink({ count: model.subjects.length, label: "Subjects", parameters: {}, selected: !filters.claim && filters.view !== "claims" && !filters.kind && !filters.scope && !filters.subject && !filters.query })}
+      ${navLink({ count: model.claims.length, label: "All claims", parameters: { view: "claims" }, selected: (filters.view === "claims" || filters.claim) && !filters.kind && !filters.scope })}
       <div class="nav-title">Claim kind</div>
       ${navLink({ count: invariantCount, label: "Invariants", parameters: { kind: "invariant" }, selected: filters.kind === "invariant" })}
       ${navLink({ count: scenarioCount, label: "Scenarios", parameters: { kind: "scenario" }, selected: filters.kind === "scenario" })}
       <div class="nav-title">Scope</div>
-      ${navLink({ count: localCount, label: "Local", parameters: { ownership: "local" }, selected: filters.ownership === "local" })}
-      ${navLink({ count: seamCount, label: "Cross-cutting", parameters: { ownership: "seam" }, selected: filters.ownership === "seam" })}
+      ${navLink({ count: localCount, label: "Local", parameters: { scope: "local" }, selected: filters.scope === "local" })}
+      ${navLink({ count: crossCuttingCount, label: "Cross-cutting", parameters: { scope: "cross-cutting" }, selected: filters.scope === "cross-cutting" })}
       </nav>
       <div class="sidebar-foot">Read-only · local repository</div>
     </aside>
@@ -300,7 +300,7 @@ function layout({ body, detail = false, model, filters, subtitle, title }) {
       <header class="toolbar">
         <form class="search${filters.query ? " has-query" : ""}" method="get" action="/" data-clear-href="${escapeHtml(clearSearchUrl)}" data-filtered="${filters.query ? "true" : "false"}">
           ${filters.kind ? `<input type="hidden" name="kind" value="${escapeHtml(filters.kind)}">` : ""}
-          ${filters.ownership ? `<input type="hidden" name="ownership" value="${escapeHtml(filters.ownership)}">` : ""}
+          ${filters.scope ? `<input type="hidden" name="scope" value="${escapeHtml(filters.scope)}">` : ""}
           ${filters.subject ? `<input type="hidden" name="subject" value="${escapeHtml(filters.subject)}">` : ""}
           ${filters.view === "claims" || filters.query ? '<input type="hidden" name="view" value="claims">' : ""}
           <span class="search-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.25" stroke="currentColor" stroke-width="1.5"/><path d="m10.25 10.25 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
@@ -348,8 +348,8 @@ export function renderExplorer(model, searchParameters = new URLSearchParams()) 
   const kind = ["invariant", "scenario"].includes(searchParameters.get("kind"))
     ? searchParameters.get("kind")
     : "";
-  const ownership = ["local", "seam"].includes(searchParameters.get("ownership"))
-    ? searchParameters.get("ownership")
+  const scope = ["local", "cross-cutting"].includes(searchParameters.get("scope"))
+    ? searchParameters.get("scope")
     : "";
   const subjectId = subjectsById.has(searchParameters.get("subject"))
     ? searchParameters.get("subject")
@@ -358,7 +358,7 @@ export function renderExplorer(model, searchParameters = new URLSearchParams()) 
   const filters = {
     claim: selectedClaim?.key ?? "",
     kind,
-    ownership,
+    scope,
     query: (searchParameters.get("q") ?? "").trim(),
     rawQuery: searchParameters.get("q") ?? "",
     subject: subjectId,
@@ -380,7 +380,7 @@ export function renderExplorer(model, searchParameters = new URLSearchParams()) 
   const showSubjects =
     searchParameters.get("view") !== "claims" &&
     !filters.kind &&
-    !filters.ownership &&
+    !filters.scope &&
     !filters.query &&
     !filters.subject;
   if (showSubjects) {
@@ -401,13 +401,13 @@ export function renderExplorer(model, searchParameters = new URLSearchParams()) 
     ? subjectLabel(selectedSubject)
     : filters.kind
       ? `${filters.kind[0].toUpperCase()}${filters.kind.slice(1)}s`
-      : filters.ownership === "seam"
+      : filters.scope === "cross-cutting"
         ? "Cross-cutting claims"
         : filters.query
           ? "Search results"
           : "All claims";
   const subtitle = selectedSubject
-    ? `${selectedSubject.id}${selectedSubject.seam ? " · cross-cutting claims" : ""}`
+    ? `${selectedSubject.id}${selectedSubject.crossCutting ? " · cross-cutting claims" : ""}`
     : `${claims.length} matching claim${claims.length === 1 ? "" : "s"}`;
   const body = claims.length
     ? `<div class="claim-grid">${claims

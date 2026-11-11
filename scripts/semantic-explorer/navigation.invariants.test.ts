@@ -46,18 +46,18 @@ describe('§1 — Exploration lenses', () => {
           'data-claim-title="Cancellation precedes reimbursement"',
         );
 
-        const seams = await fetch(
-          `${explorer.url}?ownership=seam`,
+        const crossCutting = await fetch(
+          `${explorer.url}?scope=cross-cutting`,
         ).then((response) => response.text());
-        expect(seams).toContain(
+        expect(crossCutting).toContain(
           'data-claim-title="Accepted payment reaches order creation"',
         );
-        expect(seams).not.toContain(
+        expect(crossCutting).not.toContain(
           'data-claim-title="Completed orders remain visible"',
         );
 
         const local = await fetch(
-          `${explorer.url}?ownership=local`,
+          `${explorer.url}?scope=local`,
         ).then((response) => response.text());
         expect(local).toContain(
           'data-claim-title="Completed orders remain visible"',

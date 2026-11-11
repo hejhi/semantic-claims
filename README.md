@@ -166,8 +166,6 @@ npm run explore:semantics
 
 The command checks the claim links, starts a read-only local server, and prints the URL. The explorer is a nice little dashboard that groups claims by subject and supports filtering by claim kind, cross-cutting status, and text. Restart it to pick up file changes.
 
-![Semantic Explorer showing claims grouped by subject](./assets/semantic-explorer.png)
-
 ### Install the agent skill
 
 The Semantic Claims skill follows the open [Agent Skills specification](https://agentskills.io). From a project root, install it with the [`skills` CLI](https://skills.sh):

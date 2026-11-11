@@ -6,26 +6,28 @@ const SUBJECTS = [
   {
     path: "src/auth/session",
     title: "Session",
-    scenarios: [
+    invariants: [
       [
-        "Accepted identity",
+        "Identity",
         [
           [
-            "Accepted sessions expose their verified identity",
-            "WHILE the session is accepted, WHEN the session's identity is requested, the session SHALL provide the session's verified identity.",
+            "An accepted session provides its verified identity",
+            "WHILE accepted, the session SHALL provide the session's verified identity.",
           ],
           [
-            "Expired sessions reject protected work",
-            "WHILE the session is expired, WHEN the session is checked for permission to perform protected work, the session SHALL deny the permission.",
+            "Session state is separate for each browser context",
+            "The session SHALL keep the session state of each browser context separate from the session state of every other browser context.",
           ],
         ],
       ],
+    ],
+    scenarios: [
       [
-        "Isolation",
+        "Protected work",
         [
           [
-            "Session state remains isolated by browser context",
-            "WHEN sessions are requested for different browser contexts, the session SHALL provide a distinct session for each browser context.",
+            "An expired session denies protected work",
+            "WHILE expired, WHEN protected work is attempted, the session SHALL deny the work.",
           ],
         ],
       ],
@@ -33,12 +35,12 @@ const SUBJECTS = [
         "Renewal",
         [
           [
-            "Renewal preserves the active identity",
-            "WHEN the identity of an accepted session is requested after the session renews, the session SHALL provide the verified identity from before the renewal.",
+            "Renewal retains the verified identity",
+            "WHEN an accepted session is renewed, the session SHALL retain the verified identity from before the renewal.",
           ],
           [
-            "Revocation wins over pending renewal",
-            "WHEN an earlier renewal completes after revocation begins, the session SHALL remain revoked.",
+            "A renewal after revocation leaves the session revoked",
+            "WHEN a renewal completes after the session is revoked, the session SHALL leave the session revoked.",
           ],
         ],
       ],
@@ -47,16 +49,27 @@ const SUBJECTS = [
   {
     path: "src/search/result-publication",
     title: "Search",
+    invariants: [
+      [
+        "Published results",
+        [
+          [
+            "A search in progress shows the latest published result",
+            "WHILE a search is in progress, the search SHALL show the latest published result.",
+          ],
+        ],
+      ],
+    ],
     scenarios: [
       [
         "Precedence",
         [
           [
-            "Newer searches supersede older results",
+            "A superseded search leaves the published result unchanged",
             "WHEN an older search completes after a newer search begins, the search SHALL leave the published result unchanged.",
           ],
           [
-            "The current search can publish its result",
+            "The current search publishes its result",
             "WHEN the current search completes successfully, the search SHALL publish the current search's result.",
           ],
         ],
@@ -65,8 +78,8 @@ const SUBJECTS = [
         "Failure",
         [
           [
-            "An older failure does not replace newer results",
-            "WHEN an older search fails after a newer search publishes a result, the search SHALL leave that result visible.",
+            "An older failure leaves the newer result published",
+            "IF an older search fails after a newer search publishes a result, THEN the search SHALL leave that result published.",
           ],
         ],
       ],
@@ -75,17 +88,24 @@ const SUBJECTS = [
   {
     path: "src/editor/history",
     title: "History",
+    invariants: [
+      [
+        "Undo count",
+        [
+          [
+            "The history shows the number of edits to undo",
+            "The history SHALL show the number of edits available to undo.",
+          ],
+        ],
+      ],
+    ],
     scenarios: [
       [
-        "Recorded changes",
+        "Undo",
         [
           [
             "Each undo restores a whole document",
             "WHEN an undo is requested, the history SHALL restore the whole document as the document was before the latest edit.",
-          ],
-          [
-            "Undoing an edit enables redo",
-            "WHEN an edit is undone, the history SHALL offer a redo of the edit.",
           ],
         ],
       ],
@@ -93,7 +113,7 @@ const SUBJECTS = [
         "Concurrent input",
         [
           [
-            "Remote changes retain local undo meaning",
+            "An undo after a remote change retains the remote change",
             "WHEN a local edit is undone after a remote change arrives, the history SHALL produce a document that contains the remote change and excludes that local edit.",
           ],
         ],
@@ -103,26 +123,28 @@ const SUBJECTS = [
   {
     path: "src/cache/entries",
     title: "Cache",
+    invariants: [
+      [
+        "Validity",
+        [
+          [
+            "Each stored entry is valid",
+            "The cache SHALL contain entries that are each valid.",
+          ],
+        ],
+      ],
+    ],
     scenarios: [
       [
         "Freshness",
         [
           [
-            "Fresh entries are served",
+            "A fresh entry is served",
             "WHEN a fresh entry is requested, the cache SHALL serve the entry.",
           ],
           [
-            "Expired entries are reported as stale",
-            "WHEN an expired entry is checked for freshness, the cache SHALL report the entry as stale.",
-          ],
-        ],
-      ],
-      [
-        "Rejection",
-        [
-          [
-            "Served entries are each valid",
-            "WHEN the cache's entries are requested, the cache SHALL serve entries that are each valid.",
+            "An expired entry is reported as a miss",
+            "WHEN an entry whose age is at least the entry's time to live is requested, the cache SHALL report a miss.",
           ],
         ],
       ],
@@ -136,12 +158,12 @@ const SUBJECTS = [
         "Retries",
         [
           [
-            "A retry does not duplicate an accepted delivery",
+            "A retry of an accepted delivery leaves the notification count unchanged",
             "WHEN a delivery that the delivery's destination accepted is retried, the notifier SHALL leave the number of notifications unchanged.",
           ],
           [
             "Retry delay grows after consecutive failures",
-            "WHEN a delivery fails after an earlier failed delivery, the notifier SHALL wait longer before the next retry than before the preceding retry.",
+            "IF a delivery fails after an earlier failed delivery, THEN the notifier SHALL wait longer before the next retry than before the preceding retry.",
             12,
           ],
         ],
@@ -150,8 +172,8 @@ const SUBJECTS = [
         "Cancellation",
         [
           [
-            "Cancellation prevents pending delivery",
-            "WHEN the scheduled work of a cancelled notification completes, the notifier SHALL leave the notification undelivered.",
+            "A cancelled notification remains undelivered",
+            "WHEN the scheduled delivery of a cancelled notification is due, the notifier SHALL leave the notification undelivered.",
           ],
         ],
       ],
@@ -166,10 +188,10 @@ const SUBJECTS = [
         [
           [
             "The total equals accepted lines plus tax",
-            "The invoice SHALL show a total equal to the sum of the invoice's accepted line amounts and applicable tax.",
+            "The invoice SHALL show a total equal to the sum of the invoice's accepted line amounts and the invoice's tax.",
           ],
           [
-            "Every accepted line has a positive amount",
+            "Each listed line has a positive amount",
             "The invoice SHALL list lines that each have a positive amount.",
           ],
         ],
@@ -179,17 +201,24 @@ const SUBJECTS = [
   {
     path: "src/workspaces/membership",
     title: "Workspace",
-    scenarios: [
+    invariants: [
       [
         "Authority",
         [
           [
-            "Members receive only their assigned capabilities",
-            "WHEN a member's capabilities are checked, the workspace SHALL grant exactly the capabilities assigned through the member's active roles.",
+            "Members receive exactly their assigned capabilities",
+            "The workspace SHALL grant each member exactly the capabilities of the member's active roles.",
           ],
+        ],
+      ],
+    ],
+    scenarios: [
+      [
+        "Access",
+        [
           [
-            "Removing the final role removes workspace access",
-            "WHEN a member with zero roles requests access, the workspace SHALL deny the member access.",
+            "A member with zero roles is denied access",
+            "WHEN a member with zero roles opens the workspace, the workspace SHALL deny the member access.",
           ],
         ],
       ],
@@ -197,8 +226,8 @@ const SUBJECTS = [
         "Removal",
         [
           [
-            "Removal invalidates an already-open workspace",
-            "WHEN a removed member performs a protected action in an already-open workspace, the workspace SHALL leave the workspace unchanged.",
+            "An action of a removed member leaves the workspace unchanged",
+            "WHEN a removed member attempts a protected action in an open workspace, the workspace SHALL leave the workspace unchanged.",
           ],
         ],
       ],
@@ -212,11 +241,11 @@ const SUBJECTS = [
         "Offline work",
         [
           [
-            "Locally accepted edits survive reconnection",
+            "Reconnection combines local and remote edits",
             "WHEN the client reconnects, the document SHALL contain both the locally accepted edits and the remote edits.",
           ],
           [
-            "Repeated remote delivery has one observable effect",
+            "A repeated remote change leaves the document unchanged",
             "WHEN a remote change that the document already incorporated arrives again, the document SHALL remain unchanged.",
           ],
         ],
@@ -224,19 +253,19 @@ const SUBJECTS = [
     ],
   },
   {
-    path: "src/search/--search-submission",
+    path: "src/search/--filtered-search",
     title: "Search Results",
-    scenarios: [
+    invariants: [
       [
-        "Submitted filters",
+        "Applied filters",
         [
           [
-            "Shown results match the submitted filter",
-            "WHEN a filter is submitted, the search results SHALL show exactly the results that match the submitted filter.",
+            "Shown results match the applied filter",
+            "WHILE a filter is applied, the search results SHALL show exactly the results that match the filter.",
           ],
           [
-            "Clearing the filter shows every result",
-            "WHEN the filter is cleared, the search results SHALL show every result.",
+            "Every result is shown with zero filters applied",
+            "WHILE zero filters are applied, the search results SHALL show every result.",
           ],
         ],
       ],
@@ -245,17 +274,24 @@ const SUBJECTS = [
   {
     path: "configuration",
     title: "Configuration",
+    invariants: [
+      [
+        "Normalization",
+        [
+          [
+            "An accepted configuration provides normalized settings",
+            "WHILE accepted, the configuration SHALL provide each setting in the setting's documented normalized form.",
+          ],
+        ],
+      ],
+    ],
     scenarios: [
       [
         "Validation",
         [
           [
             "Missing required settings are listed",
-            "WHILE the configuration is rejected, WHEN the missing settings are requested, the configuration SHALL list exactly the required settings that are unset.",
-          ],
-          [
-            "Accepted configuration serves normalized settings",
-            "WHILE the configuration is accepted, WHEN a setting is requested, the configuration SHALL provide the setting in the setting's documented normalized form.",
+            "WHILE rejected, WHEN the missing settings are requested, the configuration SHALL list exactly the required settings that are unset.",
           ],
         ],
       ],

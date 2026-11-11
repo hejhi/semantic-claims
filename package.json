@@ -24,7 +24,6 @@
     "FAQ.md",
     "JAVASCRIPT.md",
     "REFERENCE.md",
-    "assets/semantic-explorer.png",
     "scripts/check-semantics.mjs",
     "scripts/check-semantics/parse.mjs",
     "scripts/check-semantics/repository.mjs",

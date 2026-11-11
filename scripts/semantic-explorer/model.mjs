@@ -20,12 +20,12 @@ function subjectFor(root, claimDocumentPath, config) {
   const suffix = `${config.fileSuffix}.md`;
   const id = relativePath.slice(0, -suffix.length);
   const basename = path.posix.basename(id);
-  const seam = basename.startsWith('--');
+  const crossCutting = basename.startsWith('--');
   return {
     id,
-    name: seam ? basename.slice(2) : basename,
+    name: crossCutting ? basename.slice(2) : basename,
     path: path.posix.dirname(id) === '.' ? '' : path.posix.dirname(id),
-    seam,
+    crossCutting,
   };
 }
 
@@ -75,7 +75,7 @@ export async function buildExplorerModel(root = process.cwd()) {
         key,
         kind: record.config.kind,
         proofs,
-        seam: subject.seam,
+        crossCutting: subject.crossCutting,
         section: section
           ? { id: section.id, title: section.title }
           : null,

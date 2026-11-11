@@ -18,7 +18,7 @@ test("the preview contains varied subjects, claims, and source pages", async () 
   const model = await buildExplorerModel(root);
   expect(model.subjects).toHaveLength(10);
   expect(model.claims.length).toBeGreaterThan(20);
-  expect(model.claims.some(({ seam }) => seam)).toBe(true);
+  expect(model.claims.some(({ crossCutting }) => crossCutting)).toBe(true);
   const proofRichClaim = model.claims.reduce((current, claim) =>
     claim.proofs.length > current.proofs.length ? claim : current,
   );

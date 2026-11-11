@@ -30,7 +30,6 @@ const EXPECTED_FILES = [
   'LICENSE',
   'README.md',
   'REFERENCE.md',
-  'assets/semantic-explorer.png',
   'package.json',
   'scripts/check-semantics.mjs',
   'scripts/check-semantics/parse.mjs',
