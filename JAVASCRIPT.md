@@ -58,7 +58,7 @@ Each claim statement must match an [EARS pattern](./REFERENCE.md#claim-kinds) of
 - the words before the first `SHALL` end with `the` and the claim document's `#` heading, ignoring capitalization, where `the` begins the statement or follows `, ` or `THEN `;
 - outside its system name, a statement contains `where`, `while`, `when`, `if`, `then`, and `shall` only as uppercase keywords, and never contains `whenever`;
 - outside its system name, a statement uses `exactly` or `each` in place of `only`;
-- a statement follows `[WHERE <creation value>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>`, where each slot is nonempty and contains none of the keywords `WHERE`, `WHILE`, `WHEN`, `IF`, `THEN`, and `SHALL`;
+- a statement follows `[WHERE <feature>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>`, where each slot is nonempty and contains none of the keywords `WHERE`, `WHILE`, `WHEN`, `IF`, `THEN`, and `SHALL`;
 - an invariant statement contains neither `WHEN` nor `IF`, and a scenario statement contains one of them.
 
 ## Proof structure

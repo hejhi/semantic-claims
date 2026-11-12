@@ -10,8 +10,8 @@ Section numbers cite D. M. Berry, E. Kamsties, and M. M. Krieger, [*From Contrac
 
 "A" and "any" can mean one member or every member, and "the" presumes that exactly one exists. Write "each" for every member, and state the order or the condition that selects a single member.
 
-- **Bad:** "WHEN a form with invalid fields is submitted, the form SHALL focus the invalid field."
-- **Good:** "WHEN a form with invalid fields is submitted, the form SHALL focus the first invalid field in document order."
+- **Bad:** "IF a submission of the form contains one or more invalid fields, THEN the form SHALL focus the invalid field."
+- **Good:** "IF a submission of the form contains one or more invalid fields, THEN the form SHALL focus the first invalid field in document order."
 
 ### "all", "many", and "few" (§5.2.1, §5.2.3)
 
@@ -86,7 +86,7 @@ After several conditions, "otherwise" leaves open which condition the alternativ
 - **Good**, as three claims:
   - "WHILE the room temperature is less than 18 degrees, the thermostat SHALL heat the room."
   - "WHILE the room temperature is more than 24 degrees, the thermostat SHALL cool the room."
-  - "WHILE the room temperature is at least 18 degrees and at most 24 degrees, the thermostat SHALL idle."
+  - "WHILE the room temperature is at least 18 degrees and at most 24 degrees, the thermostat SHALL idle.", with the introduction "The thermostat *idles* while the thermostat's heating and cooling are both off."
 
 ## Reference
 

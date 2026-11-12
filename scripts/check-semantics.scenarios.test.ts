@@ -693,7 +693,7 @@ describe('§1 — No heading', () => {
 `,
     });
     const template =
-      'must follow "[WHERE <creation value>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>".';
+      'must follow "[WHERE <feature>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>".';
     const keyword =
       'must not contain "where", "while", "when", "whenever", "if", "then", or "shall" except as an uppercase keyword.';
     expect(invalid.exitCode).not.toBe(0);

@@ -174,7 +174,7 @@ The Semantic Claims skill follows the open [Agent Skills specification](https://
 npx skills add hejhi/semantic-claims
 ```
 
-Append a release tag, such as `hejhi/semantic-claims#v0.2.0`, to install the skill matching that checker release. Update or remove it with `npx skills update` and `npx skills remove`.
+Append a release tag, such as `hejhi/semantic-claims#v0.3.0`, to install the skill matching that checker release. Update or remove it with `npx skills update` and `npx skills remove`.
 
 Earlier releases installed four `semantic-claims-*` skills. Delete those directories after installing this one.
 

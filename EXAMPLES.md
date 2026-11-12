@@ -48,26 +48,26 @@ WHEN a password reset is requested for a registered email address, the account s
 
 ### A response to an event is a scenario
 
-- **Bad** (`dictionary.invariants.md`): "The dictionary SHALL respond with the definition of each word that is looked up."
-- **Good** (`dictionary.scenarios.md`): "WHEN a word that the dictionary contains is looked up, the dictionary SHALL respond with the word's definition."
+- **Bad** (invariant): "The dictionary SHALL respond with the definition of each word that is looked up."
+- **Good** (scenario): "WHEN a word that the dictionary contains is looked up, the dictionary SHALL respond with the word's definition."
 
 A lookup is an event, and the dictionary responds once to each lookup, so the claim is a scenario with the lookup as its trigger. A characteristic that is always true, as in "The dictionary SHALL define each word that the dictionary contains.", is an invariant, and its proof looks up each word to observe the word's definition.
 
 ### Creation and failure are triggers
 
-- **Bad** (`pool.invariants.md`): "WHERE created with a capacity of zero connections, the pool SHALL reject the capacity as invalid."
-- **Good** (`pool.scenarios.md`): "IF a pool is created with a capacity of zero connections, THEN the pool SHALL reject the capacity as invalid."
-- **Bad** (`editor.invariants.md`): "WHILE saving has failed, the editor SHALL show the unsaved changes."
-- **Good** (`editor.scenarios.md`): "IF saving fails, THEN the editor SHALL leave the unsaved changes in the document."
+- **Bad** (invariant): "WHERE the pool has a capacity of zero connections, the pool SHALL reject the capacity as invalid."
+- **Good** (scenario): "IF a pool is created with a capacity of zero connections, THEN the pool SHALL reject the capacity as invalid."
+- **Bad** (invariant): "WHILE saving has failed, the editor SHALL show the unsaved changes."
+- **Good** (scenario): "IF saving fails, THEN the editor SHALL leave the unsaved changes in the document."
 
-The pool rejects the capacity when the pool is created, and saving fails at one moment, so both claims describe events. `IF … THEN` may replace `WHEN` for a failure or another unwanted event. A `WHERE` clause states a configuration that the system was created with, for behavior that is true after creation succeeds.
+The pool rejects the capacity when the pool is created, and saving fails at one moment, so both claims describe events. `IF … THEN` states an unwanted event, such as a failure.
 
 ### Behavior true for as long as a state lasts is an invariant
 
-- **Bad** (`tab-bar.scenarios.md`): "WHEN a tab is selected, the tab bar SHALL underline the newly selected tab."
-- **Good** (`tab-bar.invariants.md`): "The tab bar SHALL underline the selected tab."
-- **Bad** (`search.scenarios.md`): "WHEN a filter is applied, the search SHALL show exactly the results that match the filter."
-- **Good** (`search.invariants.md`): "WHILE a filter is applied, the search SHALL show exactly the results that match the filter."
+- **Bad** (scenario): "WHEN a tab is selected, the tab bar SHALL underline the newly selected tab."
+- **Good** (invariant): "The tab bar SHALL underline the selected tab."
+- **Bad** (scenario): "WHEN a filter is applied, the search SHALL show exactly the results that match the filter."
+- **Good** (invariant): "WHILE a filter is applied, the search SHALL show exactly the results that match the filter."
 
 The selected tab is underlined, and the matching results are shown, for as long as the tab is selected or the filter is applied, so a test reads the response in any state instead of after the change that a trigger states. A response that is true for as long as a present state lasts is an invariant, even when an event, such as a selection, starts that state.
 
@@ -80,10 +80,10 @@ A term defined by an earlier event makes an invariant refer to that event. The G
 
 ### An earlier event belongs in the trigger
 
-- **Bad** (`modal.invariants.md`): "The modal SHALL focus the control that was focused before the modal opened."
-- **Good** (`modal.scenarios.md`): "WHEN the modal closes, the modal SHALL focus the control that was focused immediately before the modal opened."
-- **Bad** (`payment-service.scenarios.md`): "WHILE a payment has been accepted, WHEN a client submits the payment again, the payment service SHALL respond with the accepted outcome."
-- **Good** (`payment-service.scenarios.md`): "WHEN a client resubmits a payment that the payment service accepted earlier, the payment service SHALL respond with the outcome of the earlier accepted payment."
+- **Bad** (invariant): "The modal SHALL focus the control that was focused before the modal opened."
+- **Good** (scenario): "WHEN the modal closes, the modal SHALL focus the control that was focused immediately before the modal opened."
+- **Bad** (scenario): "WHILE a payment has been accepted, WHEN a client submits the payment again, the payment service SHALL respond with the accepted outcome."
+- **Good** (scenario): "WHEN a client resubmits a payment that the payment service accepted earlier, the payment service SHALL respond with the outcome of the earlier accepted payment."
 
 An invariant states the present state, and a `WHILE` clause states a condition on the system's present state.
 
@@ -93,10 +93,10 @@ An invariant states the present state, and a `WHILE` clause states a condition o
 
 - **Bad:** "When a password reset is requested for a registered email address, the account service shall send a reset link to the email address."
 - **Good:** "WHEN a password reset is requested for a registered email address, the account service SHALL send a reset link to the email address."
-- **Bad:** "WHILE open, WHERE created with a title, the modal SHALL show the title."
-- **Good:** "WHERE created with a title, WHILE open, the modal SHALL show the title."
+- **Bad:** "WHILE locked, WHERE the phone has a fingerprint sensor, the phone SHALL show the fingerprint prompt."
+- **Good:** "WHERE the phone has a fingerprint sensor, WHILE locked, the phone SHALL show the fingerprint prompt."
 
-Clauses appear in the order `WHERE`, `WHILE`, then `WHEN` or `IF`.
+Clauses appear in the order `WHERE`, `WHILE`, then `WHEN` or `IF`. A phone either has or lacks a fingerprint sensor for the phone's whole existence, so the sensor is a feature, and a phone locks and unlocks during the phone's existence, so being locked is a state.
 
 ### Keywords and conditional logic stay out of prose
 
@@ -147,12 +147,14 @@ A count states the interval it counts over, such as the time before a reminder i
 
 ### Behavior is stated positively
 
-- **Bad:** "WHEN a reader unsubscribes from the newsletter, the newsletter service SHALL not send issues to the reader."
-- **Good:** "WHEN a reader unsubscribes from the newsletter, the newsletter service SHALL stop sending issues to the reader."
+- **Bad** (scenario): "WHEN a reader unsubscribes from the newsletter, the newsletter service SHALL not send issues to the reader."
+- **Good** (invariant): "WHILE a reader is unsubscribed from the newsletter, the newsletter service SHALL send zero issues to the reader."
 - **Bad:** "WHEN a well-formed address is validated, the validator SHALL complete without an error."
-- **Good:** "WHEN a well-formed address is validated, the validator SHALL accept the address."
+- **Good:** "WHEN a well-formed address is validated, the validator SHALL report the address as valid."
+- **Bad:** "IF a submission is rejected, THEN the form SHALL do nothing."
+- **Good:** "IF a submission is rejected, THEN the form SHALL leave the form's accepted submission unchanged."
 
-Each claim states what the system does, as in "SHALL stop sending issues", "SHALL accept the address", and "IF a submission is rejected, THEN the form SHALL leave the form's accepted submission unchanged."
+Each claim states what the system does. A response that states an absence names the absent event or the unchanged part of the state: "SHALL send zero issues to the reader" applies in each state in which the reader is unsubscribed, so the claim is an invariant, and "SHALL leave the form's accepted submission unchanged" applies from the rejection through the form's response. "SHALL do nothing" names neither.
 
 ### A claim states meaning, and the proof checks implementation mechanics
 
@@ -292,5 +294,7 @@ WHILE a filter is applied, the search SHALL show exactly the results that match 
 - **Bad:** "IF a sign-up with an invalid email address is submitted, THEN the service SHALL validate the email address before saving the account."
 - **Good:** "IF a sign-up with an invalid email address is submitted, THEN the service SHALL leave the service's accounts unchanged."
 - **Bad:** "The service SHALL store accounts in PostgreSQL.", unless a protocol or compatibility contract places the database in the interface.
+- **Bad:** "WHEN the factory is called, the factory SHALL run the factory's function exactly once.", for a factory that the server uses to give each request's handler the request's services, and that no consumer of the server uses.
+- **Good:** "WHEN a handler changes a service of the handler's request, the server SHALL leave the services of each other request unchanged.", with the factory's claim document and proof file deleted, because the factory is part of the server's implementation.
 
 A protocol, such as HTTP, is part of the interface of a system whose consumers use that protocol, such as an API, and part of the implementation of a system whose consumers are people, such as a website.

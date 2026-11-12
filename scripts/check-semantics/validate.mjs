@@ -60,7 +60,7 @@ function escapeRegExp(text) {
 const KEYWORD = '\\b(?:WHERE|WHILE|WHEN|IF|THEN|SHALL)\\b';
 const SLOT = `(?:(?!${KEYWORD}).)+?`;
 const TEMPLATE =
-  '[WHERE <creation value>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>';
+  '[WHERE <feature>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>';
 
 // The statement rules in JAVASCRIPT.md#claim-document-structure.
 export function statementErrors(statement, kind, system) {

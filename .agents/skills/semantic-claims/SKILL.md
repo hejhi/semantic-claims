@@ -81,6 +81,8 @@ Claims are organized in structured Markdown documents called **claim documents**
 
 Claims specify what a system does without specifying solutions or implementation mechanics. They are semantic requirements from which anyone could plausibly reconstruct the system in a myriad of ways, while proving it behaves as specified.
 
+A part of a system that the system's consumers use, such as the protocol of an API, belongs to the system's interface. Every other part of the system belongs to its implementation mechanics, whether a claim names the part in code or in plain words.
+
 Red flags of implementation mechanics:
 
 - backticks, including literal code values such as `true`, `null`, or `0`
@@ -89,7 +91,7 @@ Red flags of implementation mechanics:
 
 A claim should be specified in plain language without code references at all. For instance, instead of specifying "WHILE `isOpen()` returns `true`", specify "WHILE open".
 
-If a claim cannot describe a system without referencing or prescribing implementation, then it may be that the system's characteristics do not have enough clear meaning to warrant a claim. [See here](#choosing-when-and-how-to-write-semantic-claims) on how to decide when to apply Semantic Claims.
+A characteristic that cannot be stated without implementation mechanics does not warrant a claim, as defined in [Choosing when and how to write Semantic Claims](#choosing-when-and-how-to-write-semantic-claims).
 
 ### Claim kinds
 
@@ -97,13 +99,19 @@ A claim is either an **invariant** or a **scenario**, with each getting their ow
 
 Every claim in a document is a single sentence following the EARS pattern (Easy Approach to Requirements Syntax). The EARS keywords `WHERE`, `WHILE`, `WHEN`, `IF`, `THEN`, and `SHALL` are written in uppercase, in this order:
 
-`[WHERE <creation value>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>.`
+`[WHERE <feature>, ][WHILE <state>, ][WHEN <trigger>, | IF <trigger>, THEN ]the <system name> SHALL <system response>.`
+
+Each clause narrows the cases that the claim applies to: `WHERE` selects systems by a feature, `WHILE` selects states of the system, and `WHEN` or `IF` selects an event, narrowing the state further with conditions on what the event acts on, as in "IF an *unpaid* order is marked for shipment".
 
 Rules for Semantic Claims:
 - Each bracketed clause is optional
+- A `WHERE` clause states an optional **feature** in the present tense: a characteristic, such as a configuration, that the system either has or lacks throughout the system's existence.
+- A `WHILE` clause states a **state**: a condition on the system that can change during the system's existence.
+- A `WHEN` clause states a **trigger**: an event that occurs during a system's existence. A condition on what the event acts on, such as the input of a request, is part of the trigger.
+- An `IF … THEN` clause states a trigger that is an unwanted event, such as a failure or an invalid input.
 - Each keyword may only appear a single time per claim (unless it is part of the system name itself).
 - Keywords and conditional logic must never appear in a claim's prose, such as "...shows the fallback content **when** the source...".
-- Negative statements in claims are not permitted after a `SHALL`. Systems can "not do" an unlimited number of behaviors, and Semantic Claims specifies positive characteristics; claims should be phrased positively.
+- Negative statements in claims are not permitted after a `SHALL`; claims are phrased positively. A response that a system performing no action satisfies, such as leaving a state unchanged or sending zero messages, states an **absence**. Systems can "not do" an unlimited number of behaviors, so a response that states an absence names the part of the system's state that stays unchanged, or the event that occurs zero times, and applies from the trigger through the response in a scenario, in each state that satisfies the condition in an invariant, or over an interval that the claim states.
 - Multiple `SHALL` clauses is not permitted.
 - Each claim has one response. Two responses that a test can verify separately are two claims, while responses that form one outcome, such as two outputs in a required order, are one response.
 - Avoid words where placement can cause ambiguity, like "only", preferring words like "exactly" or "each" (read [AMBIGUITY.md](references/AMBIGUITY.md)).
@@ -112,8 +120,8 @@ An **invariant** claim describes a single, observable characteristic that must a
 
 - `The <system name> SHALL <system response>.`
 - `WHILE <state>, the <system name> SHALL <system response>.`
-- `WHERE <creation value>, the <system name> SHALL <system response>.`
-- `WHERE <creation value>, WHILE <state>, the <system name> SHALL <system response>.`
+- `WHERE <feature>, the <system name> SHALL <system response>.`
+- `WHERE <feature>, WHILE <state>, the <system name> SHALL <system response>.`
 
 Rules:
 
@@ -124,15 +132,15 @@ An invariant can never refer to a prior or future state, which means it cannot s
 A **scenario** claim describes the triggering of an observable characteristic:
 
 - `WHEN <trigger>, the <system name> SHALL <system response>.`
-- `IF <trigger>, THEN the <system name> SHALL <system response>.`, which may replace `WHEN` for a failure or another unwanted event.
+- `IF <trigger>, THEN the <system name> SHALL <system response>.`
 - `WHILE <state>, WHEN <trigger>, the <system name> SHALL <system response>.`
-- `WHERE <creation value>, ` may begin any of these.
+- `WHERE <feature>, ` may begin any of these.
 
 A scenario _must_ contain a `<trigger>`, introduced by `WHEN` or `IF`. Scenarios beginning with `WHERE` or `WHILE` are acceptable, as long as a `WHEN` or `IF` clause follows them.
 
-A `<trigger>` may be an event, such as when the system runs, a request to the system, a failure (with `IF`), or a system sending a notification. Scenarios specify _when_ the system should run, whereas invariants deal only with _present (or constant) state_.
+Scenarios specify _when_ the system should run, whereas invariants deal only with _present (or constant) state_.
 
-An example of a `<trigger>` might be `WHEN a paid order is marked for shipment`. Another state condition outside of the `<trigger>` can be captured in a `WHILE` clause, for example `WHILE the shop is closed`. `WHILE` conditions in a scenario are evaluated **while** the trigger occurs (as in, before the system's response), thus the ordering of `WHILE`, `WHEN`, and `SHALL`, where `SHALL` describes the system response.
+For example, in `WHILE the shop is closed, WHEN a paid order is marked for shipment, …`, the `WHILE` condition is evaluated **while** the trigger occurs (as in, before the system's response), thus the ordering of `WHILE`, `WHEN`, and `SHALL`, where `SHALL` describes the system response.
 
 In every pattern, `<system name>` is the _exact name_ in the claim document's `#` heading (ignoring capitalization).
 

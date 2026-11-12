@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 const SKILL_FILES = [
   '.agents/skills/semantic-claims/SKILL.md',
   '.agents/skills/semantic-claims/migrations/0.2.0.md',
+  '.agents/skills/semantic-claims/migrations/0.3.0.md',
   '.agents/skills/semantic-claims/references/AMBIGUITY.md',
   '.agents/skills/semantic-claims/references/EXAMPLES.md',
   '.agents/skills/semantic-claims/references/JAVASCRIPT.md',
